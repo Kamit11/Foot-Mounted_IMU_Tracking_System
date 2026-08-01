@@ -6,7 +6,7 @@ uint32_t nextTick = 0;
 void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for Serial to be ready
-  Serial.println(F("seq,t_us,dt_us,work_time_us,missed"));
+  Serial.println(F("seq,work_time_us,mismatches"));
   nextTick = micros() + target_delta_t; // Schedule the first tick
 }
 
@@ -19,28 +19,45 @@ void loop() {
 
   // Declare prev as static to retain its value between loop iterations
   static uint32_t prev = 0;
-  uint32_t dt = now - prev;
+  // uint32_t dt = now - prev;
   prev = now;
 
-  static uint32_t missed = 0;
   // This means that the current time has reached or passed the next scheduled tick time
   if (int32_t(now - nextTick) >= 0) {
     nextTick = now + target_delta_t; // Schedule the next tick
-    missed++;
   }
 
   uint32_t w0 = micros();
   // ---The work will be here---
+
+  // Simulate some work that takes time, e.g., a floating-point calculation
+  volatile float val = 1.2345f;
+  for (int i = 0; i < 500; i++) {
+    val = (val * 1.012f) + 0.056f;
+  }
+
+  // Save the expected answer on the very first loop
+  static float expected_val = 0.0f;
+  static bool first_loop = true;
+  if (first_loop) {
+    expected_val = val;
+    first_loop = false;
+  }
+
+  static uint32_t mismatches = 0;
+  if (abs(val - expected_val) > 0.0001f) {
+    mismatches++;
+  }
+
+
   uint32_t work_time = micros() - w0;
 
   static uint32_t seq = 0;
   // 50s of data, then stop printing to avoid flooding the serial output
-  if (seq < 15000){
+  if (seq < 125000){
     Serial.print(seq);       Serial.print(',');
-    Serial.print(now);       Serial.print(',');
-    Serial.print(dt);        Serial.print(',');
     Serial.print(work_time); Serial.print(',');
-    Serial.println(missed);
+    Serial.println(mismatches);
   }
   seq++;
 }
