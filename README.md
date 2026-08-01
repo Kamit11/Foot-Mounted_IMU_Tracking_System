@@ -19,15 +19,15 @@ transmission.
 <table>
   <tr>
     <td width="50%">
-      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://raw.githubusercontent.com/Kamit11/foot-mounted-inertial-mapper/refs/heads/master/data/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png?token=GHSAT0AAAAAAECRCAO3YVDJ3L7AA5US5AZU2TOKRPA" />
+      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
     </td>
     <td width="50%">
-      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://raw.githubusercontent.com/Kamit11/foot-mounted-inertial-mapper/refs/heads/master/data/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png?token=GHSAT0AAAAAAECRCAO2GT4EQDCRUMRRIFTE2TOKSHA" />
+      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png" />
     </td>
   </tr>
   <tr>
-    <td align="center"><em>Soft-float — 889 µs</em></td>
-    <td align="center"><em>Hard-float — 101 µs</em></td>
+    <td align="center"><em>Soft-float - 889 µs</em></td>
+    <td align="center"><em>Hard-float - 101 µs</em></td>
   </tr>
 </table>
 
