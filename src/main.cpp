@@ -19,7 +19,7 @@ void loop() {
 
   // Declare prev as static to retain its value between loop iterations
   static uint32_t prev = 0;
-  // uint32_t dt = now - prev;
+  uint32_t dt = now - prev;
   prev = now;
 
   // This means that the current time has reached or passed the next scheduled tick time
