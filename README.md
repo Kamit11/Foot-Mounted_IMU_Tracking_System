@@ -4,8 +4,8 @@
 
 The mapper's Mahony filter runs at a fixed 200 Hz, giving each iteration a hard
 5,000 µs budget. To leave headroom for I²C polling and the BLE stack, hardware
-floating-point flags were enforced at the toolchain level
-(`-mfpu=fpv4-sp-d16 -mfloat-abi=softfp`) and verified against a 500-iteration
+floating point flags were enforced at the toolchain level
+(`-mfpu=fpv4-sp-d16 -mfloat-abi=softfp`) and verified against a 500 iteration
 float workload.
 
 | Build configuration          | Work time | Loop budget consumed |
@@ -34,7 +34,7 @@ transmission.
 ### Thread Preemption Safety
 
 The Nano 33 BLE runs Mbed OS beneath the sketch, so FPU register state must
-survive context switches mid-calculation. Across **120,000** iterations, work time
-showed ~50 µs of preemption-induced variance. Bit-for-bit comparison of the
+survive context switches mid calculation. Across **120,000** iterations, work time
+showed ~50 µs of preemption induced variance. Bit for bit comparison of the
 resulting floats yielded **0 mismatches**, confirming the scheduler correctly
 preserves FPU context under lazy stacking.
