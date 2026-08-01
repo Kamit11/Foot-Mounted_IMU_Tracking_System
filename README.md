@@ -13,16 +13,16 @@ float workload.
 | Soft-float (emulated)        |  ~889 µs  |               18.0 % |
 | Hard-float (Cortex-M4F FPU)  |  ~101 µs  |                2.0 % |
 
-**8.8× speedup**, reclaiming 16 % of the loop budget for sensor I/O and wireless
+**8.8× speedup**, reclaiming 16% of the loop budget for sensor I/O and wireless
 transmission.
 
 <table>
   <tr>
     <td width="50%">
-      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/user-attachments/assets/1f4dbe41-8d78-4312-a991-980ce3a3b53b" />
+      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://raw.githubusercontent.com/Kamit11/foot-mounted-inertial-mapper/refs/heads/master/data/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png?token=GHSAT0AAAAAAECRCAO3YVDJ3L7AA5US5AZU2TOKRPA" />
     </td>
     <td width="50%">
-      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/user-attachments/assets/8abc8218-febc-43fd-9141-03526e85b114" />
+      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://raw.githubusercontent.com/Kamit11/foot-mounted-inertial-mapper/refs/heads/master/data/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png?token=GHSAT0AAAAAAECRCAO2GT4EQDCRUMRRIFTE2TOKSHA" />
     </td>
   </tr>
   <tr>
