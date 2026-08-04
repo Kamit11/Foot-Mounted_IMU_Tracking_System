@@ -1,16 +1,23 @@
 #include <Arduino.h>
+#include "Arduino_BMI270_BMM150.h"
+#include "IMUHandler.h"
 
-uint32_t target_delta_t = 5000; //us
+uint32_t target_delta_t = 100000; //us -> 10Hz/0.1s
 uint32_t nextTick = 0;
 
 void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for Serial to be ready
-  Serial.println(F("seq,work_time_us,mismatches"));
   nextTick = micros() + target_delta_t; // Schedule the first tick
+
+  if (!initIMU()) {
+    while (1); // Stop execution if IMU initialization fails
+  }
 }
 
 void loop() {
+
+// --- "Tick Timing - 200Hz" --- Currently set to 100,000 microseconds (100ms) for a 10Hz loop frequency. Adjust target_delta_t for different frequencies.
   uint32_t now = micros();
 
   // Cast to int32_t to avoid overflow issues when comparing unsigned long values
@@ -29,35 +36,24 @@ void loop() {
 
   uint32_t w0 = micros();
   // ---The work will be here---
+  // Vector3 gyroData = getGyroData();
+  // Serial.print("Gyro: ");
+  // Serial.print(gyroData.x);
+  // Serial.print(", ");
+  // Serial.print(gyroData.y);
+  // Serial.print(", ");
+  // Serial.println(gyroData.z);
 
-  // Simulate some work that takes time, e.g., a floating-point calculation
-  volatile float val = 1.2345f;
-  for (int i = 0; i < 500; i++) {
-    val = (val * 1.012f) + 0.056f;
-  }
+  Vector3 accelData = getAccelData();
+  Serial.print("Accel: ");
+  Serial.print(accelData.x);
+  Serial.print(", ");
+  Serial.print(accelData.y);
+  Serial.print(", ");
+  Serial.println(accelData.z);
 
-  // Save the expected answer on the very first loop
-  static float expected_val = 0.0f;
-  static bool first_loop = true;
-  if (first_loop) {
-    expected_val = val;
-    first_loop = false;
-  }
+  //uint32_t work_time = micros() - w0;
 
-  static uint32_t mismatches = 0;
-  if (abs(val - expected_val) > 0.0001f) {
-    mismatches++;
-  }
-
-
-  uint32_t work_time = micros() - w0;
-
-  static uint32_t seq = 0;
-  // 50s of data, then stop printing to avoid flooding the serial output
-  if (seq < 125000){
-    Serial.print(seq);       Serial.print(',');
-    Serial.print(work_time); Serial.print(',');
-    Serial.println(mismatches);
-  }
-  seq++;
 }
+
+
