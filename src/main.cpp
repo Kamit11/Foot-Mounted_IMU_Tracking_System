@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "Arduino_BMI270_BMM150.h"
 #include "IMUHandler.h"
+#include "helperFunctions.h"
 
 uint32_t target_delta_t = 5000; //us
 uint32_t nextTick = 0;
@@ -9,18 +10,24 @@ uint32_t seq = 0;
 void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for Serial to be ready
-  nextTick = micros() + target_delta_t; // Schedule the first tick
+
+  // --- WAIT FOR PYTHON SCRIPT ---
+  // Block execution until at least one byte is received over Serial
+  while (Serial.available() == 0) {
+    // Wait infinitely for the start signal
+  }
+
+  Serial.read(); // Consume the start signal ('S')
 
   if (!initIMU()) {
     while (1); // Stop execution if IMU initialization fails
   }
 
-  Serial.println(F("t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed"));
+  initialize();
 }
 
 void loop() {
-
-// --- "Tick Timing - 200Hz" ---
+  // --- "Tick Timing - 200Hz" ---
   uint32_t now = micros();
 
   // Cast to int32_t to avoid overflow issues when comparing unsigned long values
@@ -40,14 +47,15 @@ void loop() {
     nextTick += target_delta_t; 
     missed++;
   }
-  
 
   uint32_t t0 = micros();
-  // ---The work will be here---
+
+  // ---IMU DATA---
   IMUData accelData = getAccelData();
   IMUData gyroData = getGyroData();
-  uint32_t current_t_imu = micros() - t0;
 
+  // ---The work will be here---
+  uint32_t current_t_imu = micros() - t0;
   uint32_t sample_valid = (accelData.valid && gyroData.valid) ? 1 : 0;
 
 
@@ -76,4 +84,21 @@ void loop() {
   last_t_serial = current_t_serial;
 }
 
+void initialize(){
+  // OVERRIDE THE DEFAULT I2C SPEED
+  Wire1.setClock(400000);
 
+  // Accel ODR to 200 Hz
+  writeRegister(0x40, 0xA9);
+  // Accel Range to +/- 16g
+  writeRegister(0x41, 0x03);
+  // Gyro ODR to 200 Hz
+  writeRegister(0x42, 0xE9);
+  
+
+  // Initialize timing variables immediately before loop() starts 
+  // to prevent a massive spike in the 'missed' deadline counter.
+  nextTick = micros() + target_delta_t; // Schedule the first tick
+
+  // Send the CSV header
+  Serial.println(F("t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu,t_serial,missed"));}
