@@ -5,41 +5,53 @@
 bool initIMU() {
     if (!IMU.begin()) {
         Serial.println("IMU initialization failed!");
-        return false; // Return false if IMU initialization fails
+        return false;
     }
-    return true; // Return true if IMU initialization is successful
+    return true;
 }
 
-Vector3 getGyroData() {
-    Vector3 gyroData = {0.0f, 0.0f, 0.0f};
+IMUData getGyroData() {
+    // Declare as static to retain the last known value between calls
+    static IMUData gyroData = {0.0f, 0.0f, 0.0f, false};
 
     if (IMU.gyroscopeAvailable()) {
         IMU.readGyroscope(gyroData.x, gyroData.y, gyroData.z);
+        gyroData.valid = true; // Mark as fresh data
     }
     else {
-        Serial.println("No gyroscope data available.");
+        gyroData.valid = false; // Mark as held data
+        // Serial.println("No gyroscope data available. Using previous sample.");
     }
     return gyroData;
 }
 
-Vector3 getAccelData() {
-    Vector3 accelData = {0.0f, 0.0f, 0.0f};
+IMUData getAccelData() {
+    // Declare as static to retain the last known value between calls
+    // Defaulting Z to 1g (or 9.8 depending on your unit scale) is safer than 0
+    static IMUData accelData = {0.0f, 0.0f, 1.0f, false}; 
+    
     if (IMU.accelerationAvailable()) {
         IMU.readAcceleration(accelData.x, accelData.y, accelData.z);
+        accelData.valid = true; // Mark as fresh data
     }
     else {
-        Serial.println("No accelerometer data available.");
+        accelData.valid = false; // Mark as held data
+        // Serial.println("No accelerometer data available. Using previous sample.");
     }
     return accelData;
 }
 
-Vector3 getMagData() {
-    Vector3 magData = {0.0f, 0.0f, 0.0f};
+IMUData getMagData() {
+    // Declare as static to retain the last known value between calls
+    static IMUData magData = {0.0f, 0.0f, 0.0f, false};
+    
     if (IMU.magneticFieldAvailable()) {
         IMU.readMagneticField(magData.x, magData.y, magData.z);
+        magData.valid = true; // Mark as fresh data
     }
     else {
-        Serial.println("No magnetometer data available.");
+        magData.valid = false; // Mark as held data
+        // Serial.println("No magnetometer data available. Using previous sample.");
     }
     return magData;
 }

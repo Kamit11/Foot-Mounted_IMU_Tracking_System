@@ -8,7 +8,6 @@ from datetime import datetime
 PORT = 'COM5'
 N = 120000
 
-rows = []
 timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
 print(f"Listening on {PORT} for {N} samples, saving to fpu_enabled_benchmark_{timestamp}.csv...")
