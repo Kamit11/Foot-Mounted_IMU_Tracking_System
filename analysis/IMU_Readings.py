@@ -1,38 +1,17 @@
-import serial
-import time
 import numpy as np
 import matplotlib.pyplot as plt
+import arduino_logger as al
 
-port = 'COM5'
 N = 6000
 FRS_Limit = 4.0 #g
-file_count = 2
 
-timestamp = time.strftime("%d-%m-%Y_%H-%M-%S")
-filename = f"data/temp_data/IMU_readings_{file_count}.csv"
+prefix = "IMU_reading"
+header = "t_us, seq, ax, ay, az, gx, gy, gz, valid, t_imu_us, t_serial_us, missed"
 
-with serial.Serial(port, 115200, timeout=2) as s, open(filename, "w") as f:
-    time.sleep(2) # Allow Arduino to reset
-    s.reset_input_buffer()
-
-    # Discard the first two reads to clear out any chopped half-lines
-    s.readline() 
-    s.readline()
-
-    print(f"Listening on {port} for {N} samples, saving to {filename}...")
-    f.write("t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu,t_serial,missed\n")
-    for i in range(N):
-        line = s.readline().decode(errors='ignore').strip()
-
-        if line and not line.startswith('seq'):
-            f.write(line + "\n")
-            if (i + 1) % 100 == 0:
-                print(f"Saved {i + 1}/{N} samples.")
-
-    print(f"Saved {N} samples to {filename}")
+csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, N=N)
 
 
-d = np.loadtxt(filename, delimiter=',', skiprows=1)
+d = np.loadtxt(csv_filepath, delimiter=',', skiprows=1)
 t_us, seq, ax, ay, az, gx, gy, gz, valid, t_imu_us, t_serial_us, missed = d.T
 
 # Calculate max, duplicates and ZOH
@@ -83,6 +62,6 @@ for label, data, color, subplot in axes_data:
 
 
 fig.tight_layout()
-fig.savefig(f"{filename.replace('.csv', '.png')}", dpi=120)
+fig.savefig(f"{csv_filepath.replace('.csv', '.png')}", dpi=120)
 
 plt.show()

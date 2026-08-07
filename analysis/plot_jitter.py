@@ -1,38 +1,15 @@
-import serial
-import time
-import os
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
+import arduino_logger as al
 
-PORT, N = 'COM5', 10000
+N = 10000
 
-rows = []
-timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+prefix = "jitter"
+header = "seq, t_us, dt_us, work_us, missed"
 
-print(f"Listening on {PORT} for {N} samples, saving to jitter_{timestamp}.csv...")
-with serial.Serial(PORT, 115200, timeout=2) as s, open(f"jitter_{timestamp}.csv", "w", encoding='utf-8') as f:
-    time.sleep(2)                 # Allow Arduino to reset
-    s.reset_input_buffer()
+csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, N=N)
 
-    f.write("seq,t,dt,work,missed\n")
-
-    rows_collected = 0
-    while rows_collected < N:
-        line = s.readline().decode(errors='ignore').strip()
-
-        # Only write lines that contain data (skip empty lines and the Arduino's header)
-        if line and not line.startswith('seq'):
-            f.write(line + "\n")
-            rows_collected += 1
-
-            if rows_collected % 1000 == 0:
-                print(f"Saved {rows_collected}/{N} samples.")
-
-print("Data collection complete. Serial port closed.")
-print("Saving to:", os.getcwd())
-
-d = np.loadtxt(f"jitter_{timestamp}.csv", delimiter=',', skiprows=1)
+d = np.loadtxt(f"{csv_filepath}", delimiter=',', skiprows=1)
 seq, t, dt, work, missed = d.T
 dt = dt[1:] # First sample is always 0, so ignore it
 
@@ -53,5 +30,5 @@ ax[1].set_xlabel("sample")
 ax[1].set_ylabel("dt (us)")
 
 plt.tight_layout()
-plt.savefig(f"jitter_{timestamp}.png", dpi=120)
+plt.savefig(f"{csv_filepath.replace('.csv', '.png')}", dpi=120)
 plt.show()

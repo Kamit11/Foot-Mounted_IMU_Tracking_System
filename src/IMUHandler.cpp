@@ -10,48 +10,39 @@ bool initIMU() {
     return true;
 }
 
-IMUData getGyroData() {
-    // Declare as static to retain the last known value between calls
-    static IMUData gyroData = {0.0f, 0.0f, 0.0f, false};
-
-    if (IMU.gyroscopeAvailable()) {
-        IMU.readGyroscope(gyroData.x, gyroData.y, gyroData.z);
-        gyroData.valid = true; // Mark as fresh data
-    }
-    else {
-        gyroData.valid = false; // Mark as held data
-        // Serial.println("No gyroscope data available. Using previous sample.");
-    }
-    return gyroData;
-}
-
-IMUData getAccelData() {
-    // Declare as static to retain the last known value between calls
-    // Defaulting Z to 1g (or 9.8 depending on your unit scale) is safer than 0
-    static IMUData accelData = {0.0f, 0.0f, 1.0f, false}; 
+IMUData getIMUData(){
+    Wire1.beginTransmission(0x68);
+    Wire1.write(0x0C); // Place pointer on the beginning of the status register.
+    Wire1.endTransmission(false); // Send data without releasing bus.
     
-    if (IMU.accelerationAvailable()) {
-        IMU.readAcceleration(accelData.x, accelData.y, accelData.z);
-        accelData.valid = true; // Mark as fresh data
-    }
-    else {
-        accelData.valid = false; // Mark as held data
-        // Serial.println("No accelerometer data available. Using previous sample.");
-    }
-    return accelData;
-}
+    // Request all 12 bytes in a single burst
+    // Automatically sends a stop signal once we finish reading 12 bytes.
+    Wire1.requestFrom(0x68, 12);
 
-IMUData getMagData() {
-    // Declare as static to retain the last known value between calls
-    static IMUData magData = {0.0f, 0.0f, 0.0f, false};
+    // The status register 
+    // [image-comments/image-20260807-123848-i1nejr.png]
+    int16_t acc_x_raw = Wire1.read() | (Wire1.read() << 8); // 0x0C + 0x0D
+    int16_t acc_y_raw = Wire1.read() | (Wire1.read() << 8); // 0x0E + 0x0F
+    int16_t acc_z_raw = Wire1.read() | (Wire1.read() << 8); // 0x10 + 0x11
+    int16_t gyr_x_raw = Wire1.read() | (Wire1.read() << 8); // 0x12 + 0x13
+    int16_t gyr_y_raw = Wire1.read() | (Wire1.read() << 8); // 0x14 + 0x15
+    int16_t gyr_z_raw = Wire1.read() | (Wire1.read() << 8); // 0x16 + 0x17
+
+    // Apply scale factors
+    // [image-comments/image-20260807-130005-4r8hfv.png]
+    float ax = -acc_y_raw/2048.0f;
+    float ay = -acc_x_raw/2048.0f;
+    float az = acc_z_raw/2048.0f;
     
-    if (IMU.magneticFieldAvailable()) {
-        IMU.readMagneticField(magData.x, magData.y, magData.z);
-        magData.valid = true; // Mark as fresh data
-    }
-    else {
-        magData.valid = false; // Mark as held data
-        // Serial.println("No magnetometer data available. Using previous sample.");
-    }
-    return magData;
+    float gx = -gyr_y_raw/16.384f;
+    float gy = -gyr_x_raw/16.384f;
+    float gz = gyr_z_raw/16.384f;
+
+
+    IMUData data = {
+        {ax, ay, az},
+        {gx, gy, gz},
+    };
+
+    return data;  
 }

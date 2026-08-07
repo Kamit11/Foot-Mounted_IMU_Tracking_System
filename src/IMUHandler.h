@@ -1,14 +1,9 @@
-#include "MathTypes.h"
+#include "mathTypes.h"
 
 struct IMUData{
-    float x;
-    float y;
-    float z;
-    bool valid; // true if a fresh sample, false if zero order hold (ZOH) sample
+    struct Vector3 acc;
+    struct Vector3 gyro;
 };
 
 bool initIMU();
-
-IMUData getGyroData();
-IMUData getAccelData();
-IMUData getMagData();
+IMUData getIMUData();

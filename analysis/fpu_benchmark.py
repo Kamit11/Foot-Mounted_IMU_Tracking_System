@@ -1,40 +1,17 @@
-import serial
-import time
-import os
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
+import arduino_logger as al
 
-PORT = 'COM5'
 N = 120000
 
-timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+prefix = "fpu_enabled_benchmark"
+header = "seq,work_time_us,mismatches"
 
-print(f"Listening on {PORT} for {N} samples, saving to fpu_enabled_benchmark_{timestamp}.csv...")
-with serial.Serial(PORT, 115200, timeout=2) as s, open(f"fpu_enabled_benchmark_{timestamp}.csv", "w", encoding='utf-8') as f:
-    time.sleep(2)                 # Allow Arduino to reset
-    s.reset_input_buffer()
-
-    f.write("seq,work_time_us,mismatches\n")
-
-    rows_collected = 0
-    while rows_collected < N:
-        line = s.readline().decode(errors='ignore').strip()
-
-        # Only write lines that contain data (skip empty lines and the Arduino's header)
-        if line and not line.startswith('seq'):
-            f.write(line + "\n")
-            rows_collected += 1
-
-            if rows_collected % 1000 == 0:
-                print(f"Saved {rows_collected}/{N} samples.")
-
-print("Data collection complete. Serial port closed.")
-print("Saving to:", os.getcwd())
+csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, N=N)
 
 
 # Load the collected data and analyze it
-d = np.loadtxt(f"fpu_enabled_benchmark_{timestamp}.csv", delimiter=',', skiprows=1)
+d = np.loadtxt(f"{csv_filepath}", delimiter=',', skiprows=1)
 seq, work, mismatches = d.T
 
 mean_work = work.mean()
@@ -61,5 +38,5 @@ plt.xlabel("Sample Index")
 plt.ylabel("Work Time (us)")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f"fpu_enabled_benchmark_{timestamp}.png", dpi=120)
+plt.savefig(f"{csv_filepath.replace('.csv', '.png')}", dpi=120)
 plt.show()
