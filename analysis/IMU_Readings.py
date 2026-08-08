@@ -67,7 +67,7 @@ for label, data, color, subplot in axes_data:
 # Plot reading times on the shared bottom subplot
 time_ax = axes['time']
 time_ax.plot(seq, t_imu_us, lw=0.8, color='purple', alpha=0.8, label=f'I2C Read mean: {t_imu_us.mean():.1f} (us)')
-time_ax.plot(seq, t_serial_us, lw=0.8, color='cyan', alpha=0.8, label=f'Serial Write mean: {t_serial_us.mean():.1f} (us)')
+time_ax.plot(seq, t_serial_us, lw=0.8, color='cyan', alpha=0.8, label='Serial Write mean: {t_serial_us.mean():.1f} (us)')
 time_ax.set_title("System Timing Costs")
 time_ax.set_xlabel("Sample Index")
 time_ax.set_ylabel("Time (μs)")
