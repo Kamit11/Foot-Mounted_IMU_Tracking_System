@@ -19,10 +19,10 @@ transmission.
 <table>
   <tr>
     <td width="50%">
-      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
+      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
     </td>
     <td width="50%">
-      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png" />
+      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png" />
     </td>
   </tr>
   <tr>
