@@ -7,7 +7,7 @@ N = 120000
 prefix = "fpu_enabled_benchmark"
 header = "seq,work_time_us,mismatches"
 
-csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, N=N)
+csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, num_samples=N)
 
 
 # Load the collected data and analyze it

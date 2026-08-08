@@ -31,6 +31,12 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
         s.flush() # Ensure the byte is sent out immediately
 
         f.write(header)
+
+        # Skip the first 10 lines
+        print("Discarding first 10 startup samples...")
+        for _ in range(10):
+            s.readline()
+
         rows_collected = 0
         while rows_collected < num_samples:
             line = s.readline().decode(errors='ignore').strip()

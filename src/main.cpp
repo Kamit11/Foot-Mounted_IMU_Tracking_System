@@ -7,23 +7,6 @@ uint32_t target_delta_t = 5000; //us
 uint32_t nextTick = 0;
 uint32_t seq = 0;
 
-void initialize(){
-  // OVERRIDE THE DEFAULT I2C SPEED TO 400kHz
-  Wire1.setClock(400000);
-
-  // Accel ODR to 200 Hz
-  writeRegister(0x40, 0xA9);
-  // Accel Range to +/- 16g
-  writeRegister(0x41, 0x03);
-  // Gyro ODR to 200 Hz
-  writeRegister(0x42, 0xE9);
-  
-
-  // Initialize timing variables immediately before loop() starts 
-  // to prevent a massive spike in the 'missed' deadline counter.
-  nextTick = micros() + target_delta_t; // Schedule the first tick
-}
-
 void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for Serial to be ready
@@ -36,11 +19,17 @@ void setup() {
 
   Serial.read(); // Consume the start signal ('S')
 
+  // IMU begin, and 
   if (!initIMU()) {
     while (1); // Stop execution if IMU initialization fails
   }
 
-  initialize();
+  // Give the BMI270 time to settle and generate its first valid samples
+  delay(50); 
+
+  // Initialize timing variables immediately before loop() starts 
+  // to prevent a massive spike in the 'missed' deadline counter.
+  nextTick = micros() + target_delta_t; // Schedule the first tick
 }
 
 void loop() {
@@ -81,10 +70,10 @@ void loop() {
   uint32_t t1 = micros();
   char buf[128];
 
-  int len = snprintf(buf, sizeof(buf), "%lu,%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%lu,%lu,%lu\n",
+  int len = snprintf(buf, sizeof(buf), "%lu,%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%lu,%lu,%lu\n",
       now, seq, 
       accData.x, accData.y, accData.z, 
-      gyroData.x, gyroData.y, gyroData.z, 
+      gyroData.x, gyroData.y, gyroData.z, _IMUData.valid,
       last_t_imu, last_t_serial, missed);
   
   seq++;

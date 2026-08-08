@@ -8,7 +8,7 @@ FRS_Limit = 4.0 #g
 prefix = "IMU_reading"
 header = "t_us, seq, ax, ay, az, gx, gy, gz, valid, t_imu_us, t_serial_us, missed"
 
-csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, N=N)
+csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, num_samples=N)
 
 
 d = np.loadtxt(csv_filepath, delimiter=',', skiprows=1)

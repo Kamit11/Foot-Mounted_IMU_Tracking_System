@@ -7,7 +7,7 @@ N = 10000
 prefix = "jitter"
 header = "seq, t_us, dt_us, work_us, missed"
 
-csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, N=N)
+csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, num_samples=N)
 
 d = np.loadtxt(f"{csv_filepath}", delimiter=',', skiprows=1)
 seq, t, dt, work, missed = d.T
