@@ -3,7 +3,6 @@
 #include "Arduino_BMI270_BMM150.h"
 #include "helperFunctions.h"
 
-const int8_t BMI270_ADDR = 0x68;
 
 /**
  * @brief Initializes the IMU and configures its high-speed settings.

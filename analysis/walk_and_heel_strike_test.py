@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import arduino_logger as al
 
 N = 3000
-prefix = "heel_strike_test"
+prefix = "initial_walk_test"
 header = "t_us,seq,ax,ay,az,gx,gy,az,valid,t_imu_us,t_serial_us,missed"
 
 # csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, num_samples=N, port='COM3')
-csv_filepath = "data/temp_data/heel_strike_test_08-08-2026_22-19-25.csv"
+csv_filepath = "data/temp_data/initial_walk_test_08-08-2026_22-06-42.csv"
 
 
 d = np.loadtxt(csv_filepath, delimiter=',', skiprows=1)
@@ -30,7 +30,7 @@ axs[0].legend()
 # Bottom Plot: Total Magnitude
 axs[1].plot(t_us, mag, label='Magnitude', color='purple')
 axs[1].axhline(16, color='r', linestyle='--', label='+16g Limit')
-axs[1].set_xlabel("Time (seconds)")
+axs[1].set_xlabel("Time (us)")
 axs[1].set_ylabel("Acceleration (g)")
 axs[1].set_title("Heel Strike Test: Total Magnitude")
 axs[1].axhline(avg_mag, color='y', linestyle='--', label=f"Mean: {avg_mag:.4f} g")

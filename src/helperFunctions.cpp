@@ -2,8 +2,6 @@
 #include <Wire.h>
 #include "helperFunctions.h"
 
-const uint8_t BMI270_ADDR = 0x68;
-
 void writeRegister(uint8_t reg, uint8_t value) {
     Wire1.beginTransmission(BMI270_ADDR);
     Wire1.write(reg);
