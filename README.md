@@ -46,7 +46,6 @@ https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/936c6308a518b85770c
 **Analysis:** The stock library shipped with a 100 Hz Output Data Rate (ODR) and a ±4 g range hardcoded, silently starving the 200 Hz loop of fresh data.
 
 **Decision:** Bypassed the library initialization. Wrote directly to the hardware configuration registers (`0x40`, `0x41`, `0x42`) to explicitly force the accelerometer and gyroscope to a 200 Hz ODR, widen the range to ±16 g, and lock in the hardware OSR2 filter. 
-https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/936c6308a518b85770ce539363e315c69f9ff1ae/src/IMUHandler.cpp#L19-L36
 
 **Result:** Three independent predictions were verified empirically:
 * The duplicate frame fraction collapsed from 50.6% to 0%.
