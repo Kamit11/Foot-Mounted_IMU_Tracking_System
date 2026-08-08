@@ -64,15 +64,16 @@ IMUData getIMUData(){
         int16_t gyr_y_raw = buffer[8] | (buffer[9] << 8); // 0x14 + 0x15
         int16_t gyr_z_raw = buffer[10] | (buffer[11] << 8); // 0x16 + 0x17
 
+        // NATIVE CHIP FRAME (No remapping, no sign flips)
         // Apply scale factors
         // [image-comments/image-20260807-130005-4r8hfv.png]
-        ax = -acc_y_raw/2048.0f;
-        ay = -acc_x_raw/2048.0f;
-        az = acc_z_raw/2048.0f;
-    
-        gx = -gyr_y_raw/16.384f;
-        gy = -gyr_x_raw/16.384f;
-        gz = gyr_z_raw/16.384f;
+        ax = acc_x_raw / 2048.0f;
+        ay = acc_y_raw / 2048.0f;
+        az = acc_z_raw / 2048.0f;
+
+        gx = gyr_x_raw / 16.384f;
+        gy = gyr_y_raw / 16.384f;
+        gz = gyr_z_raw / 16.384f;
 
         valid_sample = true;
     }
