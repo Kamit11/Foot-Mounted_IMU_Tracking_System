@@ -52,6 +52,19 @@ https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/936c6308a518b85770c
 * The quantization step quadrupled to 0.0004 g, revealing the true hardware LSB natively for the first time.
 * Because the LSB (0.49 mg) sits safely below the datasheet noise floor (~1.5 mg RMS at 200 Hz), the ±16 g range was secured without losing real data to quantization noise.
 
+### 3. Floating Point Unit (FPU) Context
+**Measurement:** Ran an FPU benchmark to determine if float operations inside the loop would be compromised or corrupted by RTOS scheduling.
+**Result:** Verified empirically that float variables successfully survive loop preemption on the nRF52840.
+
+### 4. Real-World Gait Validation
+**Measurement:** Conducted dynamic walk and heel-strike tests to validate sensor configurations against physical human gait.
+
+**Result:** 
+* **Range Justification:** Peak walking magnitude reached 6.33 g, while a hard heel strike hit 11.12 g, empirically justifying the ±16 g accelerometer range (a ±8 g configuration would have clipped). Peak gyro swing reached 860 dps, validating the ±2000 dps range.
+* **Axis Frame Establishment:** Discarded the stock library's axis remap. A physical gravity/rotation consistency test proved the chip's native right-handed coordinate frame was proper. 
+* **Z-Axis Characterization:** A two orientation flip test decomposed a 2.14% gravity-magnitude anomaly into a 1.22% physical bias and a 0.92% scale error.
+* **The ZARU Justification:** Measured a static Gyro Z axis bias of 0.144 dps. This equates to 8.7°/min of yaw drift, providing the quantitative justification for requiring a Zero Angular Rate Update (ZARU) algorithm to correct heading drift during the stance phase.
+
 
 ## Performance Profiling & Optimization
 
