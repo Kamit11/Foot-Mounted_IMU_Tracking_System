@@ -1,0 +1,4 @@
+Phase 1:
+1. Acceleromenter Z axis scale and bias confirmed:
+Scale = (1.0214 - (-0.9970)) / 2 = 1.0092
+Bias = (1.0214 + (-0.9970)) / 2 = 0.0122

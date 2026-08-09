@@ -3,8 +3,8 @@
 #pragma once
 
 struct IMUData{
-    struct Vector3 acc;
-    struct Vector3 gyro;
+    Vector3 acc;
+    Vector3 gyro;
     bool valid;
 };
 
