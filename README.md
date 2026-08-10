@@ -34,7 +34,6 @@ This revealed ~1,674 µs of fixed CPU overhead per read. A review of the library
 
 
 **Decision:** Bypassed the high overhead library wrapper in favor of raw register level access over `Wire1`. Replaced six separate API calls with a single, contiguous 12 byte burst read starting at register `0x0C` over a 400 kHz bus.
-https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/936c6308a518b85770ce539363e315c69f9ff1ae/src/IMUHandler.cpp#L38-L82
 
 **Result:** Read time dropped to 477 µs (a 22× speedup), consuming only 27.6% of the loop budget with zero missed deadlines.
 <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/75c24329-0ce5-4d7b-a27a-eafdbd623e45" />
