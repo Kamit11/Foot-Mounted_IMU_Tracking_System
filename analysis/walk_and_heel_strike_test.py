@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import arduino_logger as al
 
-N = 3000
+N = 9999999
 prefix = "initial_walk_test"
-header = "t_us,seq,ax,ay,az,gx,gy,az,valid,t_imu_us,t_serial_us,missed"
+header = "t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed"
 
 # csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, num_samples=N, port='COM3')
-csv_filepath = "data/temp_data/initial_walk_test_08-08-2026_22-06-42.csv"
+csv_filepath = "data/temp_data/initial_walk_test_10-08-2026_18-01-41_awkward_walk_carpet.csv"
 
 
 d = np.loadtxt(csv_filepath, delimiter=',', skiprows=1)
@@ -15,7 +15,8 @@ t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed = d.T
 
 mag = np.sqrt(ax**2 + ay**2 + az**2)
 avg_mag = mag.mean()
-fig, axs = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+fig, axs = plt.subplots(2, 1, figsize=(12
+                                       , 8), sharex=True)
 
 # Top Plot: Individual Axes
 axs[0].plot(t_us, ax, label='Accel X', alpha=0.7)

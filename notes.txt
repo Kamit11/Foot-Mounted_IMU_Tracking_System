@@ -1,4 +1,53 @@
 Phase 1:
-1. Acceleromenter Z axis scale and bias confirmed:
+Acceleromenter Z axis scale and bias confirmed:
 Scale = (1.0214 - (-0.9970)) / 2 = 1.0092
 Bias = (1.0214 + (-0.9970)) / 2 = 0.0122
+
+
+Walk tests: In every test, the Arduino is connected to the right foot.
+1. 16-28-57:
+-Surface = regular floor tiles.
+-Pace = regular
+-Distance = 20m
+-Step count = 27
+-Started pacing with my left foot, ended with my right foot, 
+hence 27 steps in total.
+
+2. 16-30-37:
+-Surface = regular floor tiles.
+-Pace = regular
+-Distance = 20m
+-Step count = 27
+-Other: Started pacing with my left foot, ended with my right foot, 
+hence 27 steps in total.
+
+3. 16-31-45:
+-Surface = regular floor tiles.
+-Pace = regular
+-Distance = 20m
+-Step count = 28
+-Other: Started pacing with my left foot, ended with my  foot, 
+hence 28 steps in total.
+
+4. 16-33-37:
+-Surface = regular floor tiles.
+-Pace = regular
+-Distance = 20m
+-Step count = 28
+-Other: Started pacing with my left foot, ended with my  foot, 
+hence 28 steps in total.
+
+
+~Sixty sec walk test:
+-Surface = regular floor tiles.
+-Pace = regular
+-Distance = ?
+-Step count = ?
+-Other: Walked mainly in a straight line.
+
+Awkward walk:
+-Surface = library carpet
+-Pace - Changing pace and gait. Includes stops.
+-Distance = ?
+-Step count = ?
+-Other = None
