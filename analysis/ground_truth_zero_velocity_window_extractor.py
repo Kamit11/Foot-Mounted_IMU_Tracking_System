@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 file_name = "data/measured_walks/initial_walk_test_10-08-2026_16-38-16_long_walk.csv"
 df = pd.read_csv(file_name)
 
-sample_idx = df.index
+sample_idx = df['seq']
 accel_mag = np.sqrt(df['ax']**2 + df['ay']**2 + df['az']**2)
 gyro_mag = np.sqrt(df['gx']**2 + df['gy']**2 + df['gz']**2)
 
@@ -32,6 +32,10 @@ plt.close()
 
 stance_starts = []
 stance_ends = []
+
+if len(click) % 2 != 0:
+    print(f"Warning: You clicked an odd number of times ({len(click)}). Dropping the last incomplete pair.")
+    click = click[:-1] # Slicing off the last item to make it even
 
 for i in range(0, len(click), 2):
     # clicks is a list of (x, y) tuples. We only want the X-coordinate (sample index)
