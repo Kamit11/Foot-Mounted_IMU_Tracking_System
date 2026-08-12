@@ -18,8 +18,8 @@ acc_mag = np.sqrt(df['ax']**2 + df['ay']**2 + df['az']**2)
 gyr_mag = np.sqrt(df['gx']**2 + df['gy']**2 + df['gz']**2)
 
 
-zoom_start = 2
-zoom_end = 10 
+zoom_start = 8
+zoom_end = 15 
 
 # Create a boolean mask to slice the exact timeframe
 mask = (time_sec >= zoom_start) & (time_sec <= zoom_end)
