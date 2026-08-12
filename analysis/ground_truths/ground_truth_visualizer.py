@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pylab as plt
 
 
-ground_truth_csv = 'data/ZVW_hand_labels/ground_truth_ZVW.csv'
+ground_truth_csv = 'data/ZVW_hand_labels/ground_truth_ZVW_hand_labeled.csv'
 recording_csv = 'data/measured_walks/initial_walk_test_10-08-2026_16-31-45_3.csv'
 
 df_truth = pd.read_csv(ground_truth_csv)
