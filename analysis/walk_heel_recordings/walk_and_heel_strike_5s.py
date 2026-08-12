@@ -42,9 +42,6 @@ lines_2, labels_2 = axs2.get_legend_handles_labels()
 axs.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper right')
 
 
-# This dynamically creates tick marks every 0.1 seconds for your specific window
-# axs.set_xticks(np.arange(zoom_start, zoom_end + 0.1, 0.1)) 
-
 axs.grid(True)
 plt.title(f"Peak Analysis: {zoom_start}s to {zoom_end}s")
 
