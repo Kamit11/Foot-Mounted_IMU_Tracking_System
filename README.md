@@ -1,6 +1,6 @@
-# Foot-Mounted IMU Tracking System
+# Foot Mounted IMU Tracking System
 
-This repository tracks the embedded development and hardware characterization of a 6-DOF (Accel + Gyro) tracking system using the BMI270 IMU on an nRF52840 (Arduino Nano 33 BLE Rev2). 
+This repository tracks the embedded development and hardware characterization of a 6 DOF (Accel + Gyro) tracking system using the BMI270 IMU on an nRF52840 (Arduino Nano 33 BLE Rev2). 
 
 ## Engineering Log & Hardware Characterization
 
@@ -32,12 +32,10 @@ This revealed ~1,674 µs of fixed CPU overhead per read. A review of the library
   </tr>
 </table>
 
-
 **Decision:** Bypassed the high overhead library wrapper in favor of raw register level access over `Wire1`. Replaced six separate API calls with a single, contiguous 12 byte burst read starting at register `0x0C` over a 400 kHz bus.
 
 **Result:** Read time dropped to 477 µs (a 22× speedup), consuming only 27.6% of the loop budget with zero missed deadlines.
 <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/75c24329-0ce5-4d7b-a27a-eafdbd623e45" />
-
 
 ### 2. Sensor Configuration Discovery 
 **Measurement:** Initial data logs revealed a 50.6% duplicate frame rate and physical signal clipping.
@@ -60,6 +58,27 @@ This revealed ~1,674 µs of fixed CPU overhead per read. A review of the library
 * **Z Axis Characterization:** A two orientation flip test decomposed a 2.14% gravity magnitude anomaly into a 1.22% physical bias and a 0.92% scale error.
 * **The ZARU Justification:** Measured a static Gyro Z axis bias of 0.144 dps. This equates to 8.7°/min of yaw drift, providing the quantitative justification for requiring a Zero Angular Rate Update (ZARU) algorithm to correct heading drift during the stance phase.
 
+<p align="center">
+  <em><img width="720" height="360" alt="image" src="https://github.com/user-attachments/assets/61a28a02-528d-44a5-b131-341a907be59e" /></em>
+</p>
+
+
+### 4. Zero Velocity Window (ZVW) Detection
+**Objective:** Build a robust algorithm to identify the exact moments the foot is perfectly still during the stance phase to allow for instantaneous velocity resets (ZUPT).
+
+**Method:** Constructed a three condition detector evaluating sample by sample data. The conditions require the acceleration magnitude to sit within a tight 1.0 g band, the gyroscope magnitude to fall below a maximum threshold, and the trailing rolling variance to remain quiet. These conditions must hold true for a minimum dwell time of 20 consecutive samples to reject mid air transients.
+
+**Evaluation:** The algorithm was tuned exclusively on a manually labeled long walk dataset. It was then evaluated against a completely unseen 20 meter walk to prove generalization and avoid overfitting.
+
+**Result:** 
+* **Accuracy:** Achieved a perfect 10/10 detection rate on the unseen validation data with zero false positives.
+* **Boundary Precision:** Algorithm entry boundaries agreed with the manually labeled ground truth within ±3 samples. 
+* **Conclusion:** This provides a mathematically proven, robust classifier for the integration pipeline.
+
+<p align="center">
+  <em><img width="1680" height="720" alt="image" src="https://github.com/user-attachments/assets/1f3dabdd-5b2a-4b7f-8eec-505351b550ad" />
+</em>
+</p>
 
 ## Performance Profiling & Optimization
 
@@ -71,10 +90,10 @@ floating point flags were enforced at the toolchain level
 (`-mfpu=fpv4-sp-d16 -mfloat-abi=softfp`) and verified against a 500 iteration
 float workload.
 
-| Build configuration          | Work time | Loop budget consumed |
+| Build configuration            | Work time | Loop budget consumed |
 | :--------------------------- | --------: | -------------------: |
-| Soft-float (emulated)        |  ~889 µs  |               18.0 % |
-| Hard-float (Cortex-M4F FPU)  |  ~101 µs  |                2.0 % |
+| Soft float (emulated)        |  ~889 µs  |               18.0 % |
+| Hard float (Cortex M4F FPU)  |  ~101 µs  |                2.0 % |
 
 **8.8× speedup**, reclaiming 16% of the loop budget for sensor I/O and wireless
 transmission.
@@ -82,15 +101,15 @@ transmission.
 <table>
   <tr>
     <td width="50%">
-      <img width="100%" alt="Serial output: 500-iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
+      <img width="100%" alt="Serial output: 500 iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
     </td>
     <td width="50%">
       <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png" />
     </td>
   </tr>
   <tr>
-    <td align="center"><em>Soft-float - 889 µs</em></td>
-    <td align="center"><em>Hard-float - 101 µs</em></td>
+    <td align="center"><em>Soft float (889 µs)</em></td>
+    <td align="center"><em>Hard float (101 µs)</em></td>
   </tr>
 </table>
 
@@ -99,4 +118,4 @@ transmission.
 The Nano 33 BLE runs Mbed OS beneath the sketch, so FPU register state must
 survive context switches mid calculation. Across **120,000** iterations, work time
 showed ~50 µs of preemption induced variance. Bit for bit comparison of the
-resulting floats yielded **0 mismatches**, confirming the scheduler correctly preserves FPU context during thread preemption
+resulting floats yielded **0 mismatches**, confirming the scheduler correctly preserves FPU context during thread preemption.
