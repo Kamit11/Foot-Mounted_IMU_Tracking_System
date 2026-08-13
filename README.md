@@ -59,7 +59,7 @@ This revealed ~1,674 µs of fixed CPU overhead per read. A review of the library
 * **The ZARU Justification:** Measured a static Gyro Z axis bias of 0.144 dps. This equates to 8.7°/min of yaw drift, providing the quantitative justification for requiring a Zero Angular Rate Update (ZARU) algorithm to correct heading drift during the stance phase.
 
 <p align="center">
-  <em><img width="720" height="360" alt="image" src="https://github.com/user-attachments/assets/61a28a02-528d-44a5-b131-341a907be59e" /></em>
+  <em><img width="720" height="360" alt="image" src="https://github.com/user-attachments/assets/f04756c7-8e61-4543-9f0b-0705b5416ab2" /></em>
 </p>
 
 
