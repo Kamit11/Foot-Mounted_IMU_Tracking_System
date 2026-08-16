@@ -1,5 +1,10 @@
 import numpy as np
-import pandas as pd
+
+ACC_DEVIATION = 0.3    # Allowable deviation from 1.0g
+GYRO_LIMIT = 75.0       # Maximum dps
+VAR_LIMIT = 0.06        # Maximum rolling variance
+VAR_WINDOW = 15         # Variance window to calculate
+DWELL = 20               # Minimum consecutive samples
 
 def detect_zvw(df, acc_thresh, gyro_thresh, var_thresh, var_window, min_dwell):
     acc_mag = np.sqrt(df['ax']**2 + df['ay']**2 + df['az']**2)

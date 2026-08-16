@@ -110,3 +110,20 @@ def quaternions_to_euler(quats):
     yaw = np.arctan2(siny_cosp, cosy_cosp)
     
     return np.rad2deg(roll), np.rad2deg(pitch), np.rad2deg(yaw)
+
+def rotate_vector_by_quaternion(v, q):
+    # Extract vector components
+    vx, vy, vz = v[:, 0], v[:, 1], v[:, 2]
+    # Extract quaternion components
+    qw, qx, qy, qz = q[:, 0], q[:, 1], q[:, 2], q[:, 3]
+    
+    # 3D Quaternion Rotation Math (v_new = q * v * q^-1)
+    tx = 2.0 * (qy * vz - qz * vy)
+    ty = 2.0 * (qz * vx - qx * vz)
+    tz = 2.0 * (qx * vy - qy * vx)
+    
+    rx = vx + qw * tx + (qy * tz - qz * ty)
+    ry = vy + qw * ty + (qz * tx - qx * tz)
+    rz = vz + qw * tz + (qx * ty - qy * tx)
+    
+    return np.column_stack((rx, ry, rz))
