@@ -3,6 +3,15 @@ import time
 import os
 from datetime import datetime
 
+
+N = 999999
+
+prefix = "tilt_long_edge"
+header = "t_us, seq, ax, ay, az, gx, gy, gz, valid, t_imu_us, t_serial_us, missed"
+port = 'COM3'
+
+
+
 def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benchmark", save_to_temp_dir=True):
     """
     Collects data from an Arduino via serial port and saves it to a CSV.
@@ -53,3 +62,7 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
     print("Saved to:", filepath)
     
     return filepath
+
+
+
+csv_filepath = collect_serial_data(header=header, file_prefix=prefix, num_samples=N, port=port)
