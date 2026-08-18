@@ -23,23 +23,23 @@ Foot-mounted inertial navigation for indoor mapping and dead reckoning using zer
 ### 1. Attitude Verification & ZVW-Gated Mahony
 To prevent the gyroscope from drifting during human gait, a Mahony filter is aggressively gated by the Zero Velocity Window (ZVW) mask. The accelerometer correction only applies when the foot is planted, allowing the filter to run open-loop on the gyro during the swing phase.
 
-**Verification Results:**
-* **60s Stationary:** Roll -0.983° ± 0.0083°, Pitch +0.973° ± 0.0067°. The filter holds perfectly flat for a minute with eight thousandths of a degree of noise.
-* **Tilt-and-Return:** Recovered with errors of 0.169°/0.217° on one axis, and 0.440°/0.470° on the other, after rapid dynamic excursions to -34° and -41°. 
+**Verification Results (Tuned at $K_p=2.0, K_i=0.5$):**
+* **60s Stationary:** Roll -0.994° (σ < 0.01°), Pitch +0.764° (σ < 0.01°). The filter exhibits a ~20 s initial integral convergence before maintaining a stable, flat baseline.
+* **Tilt-and-Return:** Recovered with errors of 0.225°/0.153° on one axis, and 0.464°/0.307° on the other, after rapid dynamic excursions to -34° and -41°. 
 
 <p align="center">
   <img src="data/orientation_mahony/initial_walk_test_10-08-2026_16-38-16_long_walk_roll_pitch.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 2: 80° uncontrolled gyro drift divergence against a perfectly bounded ~2° trace using the ZVW-gated Mahony filter.</em>
+  <em>Figure 2: 80° uncontrolled gyro drift divergence against a bounded trace using the ZVW-gated Mahony filter (tilt residual < 2° measured during ZVW).</em>
 </p>
 
 ### 2. Error Mechanism & Integration Pipeline
 The system relies on double integration of linear acceleration, with ZUPT resetting velocity to zero at every stance phase. The causal chain of integration error was successfully identified and quantified:
-* **The Mechanism:** Pre-ZUPT velocity predicts the final distance error with an incredibly strong correlation ($r = -0.997$). 
+* **The Mechanism:** Pre-ZUPT velocity predicts the final distance error with an incredibly strong correlation ($r = -0.997, n = 4$). 
 * **Physics Match:** The fitted slope of this error (-5.70 m per m/s) matches the analytical physical prediction ($\frac{1}{2}vTN$) to within 10%, confirming the causal chain from attitude tilt error $\rightarrow$ gravity leakage $\rightarrow$ integration drift.
 
 <p align="center">
   <img src="data/orientation_mahony/initial_walk_test_10-08-2026_16-31-45_3_ZUPT_vs_NoZUPT.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 3: Velocity integration with and without Zero Velocity Updates (ZUPT) demonstrating the instantaneous mitigation of the drift.</em>
+  <em>Figure 3: Velocity integration with and without Zero Velocity Updates (ZUPT) demonstrating the instantaneous mitigation of linear velocity drift.</em>
 </p>
 
 ### 3. Kp/Ki Tuning & The Controlled Experiment
@@ -91,11 +91,11 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 </table>
 
 **Decision:** Bypassed the library wrapper for raw register-level access via a contiguous 12-byte burst read at 400 kHz.
-**Result:** Read time dropped to 477 µs (a 22× speedup). The 200 Hz scheduler was successfully maintained, with jitter strictly bounded and tightly spiked around the 5,000 µs deadline.
+**Result:** Read time dropped to 477 µs (a 22× speedup). The 200 Hz scheduler was successfully maintained, with jitter strictly bounded: dt mean 5000 µs, min 4972, max 5029, and 0 missed deadlines over 60,000 samples (5 minutes).
 
 <p align="center">
-  <img src="data/Jitter/jitter_01-08-2026_20-42-05.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 7: Loop timing jitter histogram post-optimization, confirming strict adherence to the 200 Hz (5,000 µs) scheduler target.</em>
+  <img src="data/IMU_Reading_Times/IMU_reading_times_I2C_Optimized_Burst_07-08-2026_18-53-38_jitter.png" style="width: 65%; height: auto;" /><br>
+  <em>Figure 7: Burst-read loop timing. dt mean 5000 µs, min 4972, max 5029, 0 missed deadlines over 60,000 samples (5 minutes).</em>
 </p>
 
 ### 2. Sensor Configuration Discovery
@@ -118,6 +118,14 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 **Evaluation:** 
 * **Accuracy:** Empirically validated on held-out data with a 100% detection rate (20/20 on the tuning set alongside 10/10 on the held-out validation walk).
 * **Boundary Precision:** Algorithm entry boundaries agreed with manual ground truth to a mean offset of +1.4 samples (ranging -3 to +7). Exit boundaries were systematically late by 8–12 samples across every window due to the trailing 15-sample variance threshold holding the gate open.
+
+---
+
+## Limitations & Future Work
+- **Vertical position not corrected:** Z closure error is 0.43–0.59 m over 20 m on a level floor. Excluded by design — barometer indoor accuracy is worse than the objects being measured.
+- **No heading correction yet:** ZARU, loop closure, and Manhattan snapping are not implemented. Maps are body-relative with arbitrary north.
+- **Pipeline runs offline in Python:** Firmware currently logs data only; no on-board estimation or BLE transmission is active.
+- **Accelerometer calibration measured but unapplied:** (Bias 1.22%, scale 0.92% on the Z-axis).
 
 ---
 
