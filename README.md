@@ -9,7 +9,7 @@ Foot-mounted inertial navigation for indoor mapping and dead reckoning using zer
 | **Straight-Line Distance Error** | Mean: +0.51% (Std: 1.47%, Worst single run: 2.59%) across 4 × 20 m walks. | < 5.0% |
 | **ZVW Detection Accuracy** | 100% (20/20 on tuning set, 10/10 on held-out validation). | 100% |
 | **Loop Timing** | 200 Hz scheduler maintained. Jitter tightly spiked at 5,000 µs. | 5,000 µs |
-| **Attitude Stability** | 60s stationary drift: < 0.01°. Dynamic tilt-and-return recovery: < 0.5°. | < 1.0° |
+| **Attitude Stability** | Settled noise σ < 0.01°, ~20 s initial convergence. Dynamic tilt-and-return recovery: < 0.5°. | < 1.0° |
 
 <p align="center">
   <img src="data/orientation_mahony/initial_walk_test_10-08-2026_16-28-57_1_2D_Trajectory.png" style="width: 65%; height: auto;" /><br>
@@ -39,7 +39,7 @@ The system relies on double integration of linear acceleration, with ZUPT resett
 
 <p align="center">
   <img src="data/orientation_mahony/initial_walk_test_10-08-2026_16-31-45_3_ZUPT_vs_NoZUPT.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 3: Velocity integration with and without Zero Velocity Updates (ZUPT) demonstrating the instantaneous mitigation of exponential drift.</em>
+  <em>Figure 3: Velocity integration with and without Zero Velocity Updates (ZUPT) demonstrating the instantaneous mitigation of the drift.</em>
 </p>
 
 ### 3. Kp/Ki Tuning & The Controlled Experiment
@@ -57,7 +57,7 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 | Run | Z-Residual Before ($g$) | Z-Residual After ($g$) | Horizontal Tilt Error Before | Horizontal Tilt Error After | Tilt Reduction |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Run 1** | 0.0261 | 0.0264 | 0.81° | 0.049° | 16.5x |
-| **Run 2** | 0.0257 | 0.0260 | 0.77° | 0.033° | 20.4x |
+| **Run 2** | 0.0257 | 0.0260 | 0.77° | 0.038° | 20.3x |
 | **Run 3** | 0.0233 | 0.0238 | 0.98° | 0.053° | 18.5x |
 | **Run 4** | 0.0233 | 0.0233 | 0.37° | 0.011° | 33.6x |
 
