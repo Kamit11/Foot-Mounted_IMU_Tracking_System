@@ -123,3 +123,80 @@ Error percentage: -3.890%
 Final Z (Vertical) Error: -0.570 m
 Mean Pre-ZUPT X-Velocity: -0.044 m/s
 
+
+
+
+
+=====================
+
+
+
+
+
+Kp and Ki test over the long walk yielded optimal values of Kp = 2.0, Ki = 0.5.
+New Integration results:
+Walk: 
+initial_walk_test_10-08-2026_16-28-57_1.csv
+
+Residuals: 
+Mean X Error: 0.00037233386285538445 g
+Mean Y Error: -0.0007803020677325412 g
+Mean Z Error: 0.026407278209371093 g
+
+Data:
+Final XY Distance: 19.936 m
+Target: 19.985 m 
+Error percentage: 0.248%
+Final Z (Vertical) Error: -0.584 m
+Mean Pre-ZUPT X-Velocity: 0.092 m/s
+
+---
+
+Walk: 
+initial_walk_test_10-08-2026_16-30-37_2.csv
+
+Residuals: 
+Mean X Error: 0.0004371814357682533 g
+Mean Y Error: -0.0004926289990872107 g
+Mean Z Error: 0.02597140655962606 g
+
+Data:
+Final XY Distance: 20.076 m
+Target: 19.985 m 
+Error percentage: -0.457%
+Final Z (Vertical) Error: -0.589 m
+Mean Pre-ZUPT X-Velocity: 0.047 m/s
+
+---
+
+Walk: 
+initial_walk_test_10-08-2026_16-31-45_3
+
+Residuals: 
+Mean X Error: 0.00043233759009220045 g
+Mean Y Error: -0.0008077868042431763 g
+Mean Z Error: 0.023831311322172703 g
+
+Data:
+Final XY Distance: 19.833 m
+Target: 19.985 m 
+Error percentage: 0.762%
+Final Z (Vertical) Error: -0.049 m
+Mean Pre-ZUPT X-Velocity: 0.088 m/s
+
+---
+
+Walk: 
+initial_walk_test_10-08-2026_16-33-37_4.csv
+
+Residuals: 
+Mean X Error: 6.132940048968439e-05 g
+Mean Y Error: -0.00019058553355382157 g
+Mean Z Error: 0.023315622623231762 g
+
+Data:
+Final XY Distance: 20.503 m
+Target: 19.985 m 
+Error percentage: -2.592%
+Final Z (Vertical) Error: -0.429 m
+Mean Pre-ZUPT X-Velocity: -0.006 m/s

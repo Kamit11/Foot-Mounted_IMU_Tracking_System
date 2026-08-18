@@ -68,12 +68,12 @@ def evaluate_tilt_test(csv_filepath, test_name):
              verticalalignment='top', bbox=bbox_props)
     
     plt.tight_layout()
-    plt.savefig(csv_filepath.replace('.csv', '_tilt_eval.png'), dpi=120)
+    plt.savefig(csv_filepath.replace('.csv', '_tilt_eval_Kp_Ki_change.png'), dpi=120)
     plt.show()
 
 
 # X Axis Tilt
-evaluate_tilt_test('data/temp_data/tilt_long_edge_17-08-2026_16-51-01.csv', 'X-Axis Tilt Test (Roll)')
+evaluate_tilt_test('data/orientation_mahony/tilt_long_edge_17-08-2026_16-51-01.csv', 'X-Axis Tilt Test (Roll)')
 
 # Y Axis Tilt
-evaluate_tilt_test('data/temp_data/tilt_usb_edge_17-08-2026_16-50-19.csv', 'Y-Axis Tilt Test (Pitch)')
+evaluate_tilt_test('data/orientation_mahony/tilt_usb_edge_17-08-2026_16-50-19.csv', 'Y-Axis Tilt Test (Pitch)')

@@ -14,7 +14,7 @@ port = 'COM3'
 # csv_filepath = al.collect_serial_data(header=header, file_prefix=prefix, num_samples=N, port=port)
 
 
-csv_filepath = 'data/temp_data/60_s_stationary_log_17-08-2026_15-17-25.csv'
+csv_filepath = 'data/orientation_mahony/60_s_stationary_log_17-08-2026_15-17-25.csv'
 df = pd.read_csv(csv_filepath, skipinitialspace=True)
 
 ax = df['ax']
@@ -72,7 +72,7 @@ ax2.text(0.98, 0.08, pitch_text, transform=ax2.transAxes, fontsize=10,
          verticalalignment='bottom', horizontalalignment='right', bbox=bbox_props)
 
 plt.tight_layout()
-plt.savefig('data/orientation_mahony/60_s_stationary_stability.png', dpi=120)
+plt.savefig('data/orientation_mahony/60_s_stationary_stability_Kp_Ki_change.png', dpi=120)
 plt.show()
 
 

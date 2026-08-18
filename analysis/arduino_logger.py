@@ -64,5 +64,5 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
     return filepath
 
 
-
-csv_filepath = collect_serial_data(header=header, file_prefix=prefix, num_samples=N, port=port)
+if __name__ == "__main__":
+    csv_filepath = collect_serial_data(header=header, file_prefix=prefix, num_samples=N, port=port)

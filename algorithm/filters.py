@@ -1,6 +1,6 @@
 import numpy as np
 
-def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=1.0, Ki=0.0):
+def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=2.0, Ki=0.5, get_eInt_vals = False):
     # static initialization:
     # Find the average gravity vector over the first 100 samples (0.5s of standing still)
     mean_ax = np.mean(ax[:100])
@@ -37,6 +37,8 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=1.0, Ki=0.0):
 
     eInt_x, eInt_y, eInt_z = 0.0, 0.0, 0.0
 
+    e_ints = np.zeros((len(dt_array), 3))
+
     # filter loop
     for i in range(1, len(dt_array)):
         dt = dt_array[i]
@@ -45,11 +47,16 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=1.0, Ki=0.0):
         wy = gy_rad[i]
         wz = gz_rad[i]
 
+        # Apply the permanent hardware bias estimate to every single sample, 
+        # regardless of whether the foot is swinging or planted.
+        wx += (Ki * eInt_x)
+        wy += (Ki * eInt_y)
+        wz += (Ki * eInt_z)
+
         a_x, a_y, a_z = ax[i], ay[i], az[i]
         acc_norm = np.sqrt(a_x**2 + a_y**2 + a_z**2)
         
-        # Only correct if accel is valid AND the foot is perfectly still (ZVW gate)!
-        # keep the acc_norm > 0.0 here to prevent an accidental division by zero (wire glitch or someth)
+        # Only calculate errors and update estimates if the foot is perfectly still
         if acc_norm > 0.0 and zvw_mask[i]:
             a_x /= acc_norm
             a_y /= acc_norm
@@ -65,16 +72,20 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=1.0, Ki=0.0):
             e_y = (a_z * v_x) - (a_x * v_z)
             e_z = (a_x * v_y) - (a_y * v_x)
 
+            # Update the persistent bias estimate (integration)
             if Ki > 0.0:
                 eInt_x += e_x * dt
                 eInt_y += e_y * dt
                 eInt_z += e_z * dt
-            else:
-                eInt_x, eInt_y, eInt_z = 0.0, 0.0, 0.0
 
-            wx += (Kp * e_x) + (Ki * eInt_x)
-            wy += (Kp * e_y) + (Ki * eInt_y)
-            wz += (Kp * e_z) + (Ki * eInt_z)
+            # Apply the real time Proportional nudge
+            wx += (Kp * e_x)
+            wy += (Kp * e_y)
+            wz += (Kp * e_z)
+
+
+        # REMOVE THIS AFTER - FOR DEBUGGING PURPOSES!
+        e_ints[i] = [Ki * eInt_x, Ki * eInt_y, Ki * eInt_z]
 
         # gyro integration
         qw, qx, qy, qz = q
@@ -92,7 +103,8 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=1.0, Ki=0.0):
         q = q / np.linalg.norm(q)
         quaternions[i] = q
 
-    return quaternions
+    return e_ints if get_eInt_vals else quaternions
+
 
 def quaternions_to_euler(quats):
     w, x, y, z = quats[:, 0], quats[:, 1], quats[:, 2], quats[:, 3]
@@ -110,6 +122,8 @@ def quaternions_to_euler(quats):
     yaw = np.arctan2(siny_cosp, cosy_cosp)
     
     return np.rad2deg(roll), np.rad2deg(pitch), np.rad2deg(yaw)
+
+
 
 def rotate_vector_by_quaternion(v, q):
     # Extract vector components
