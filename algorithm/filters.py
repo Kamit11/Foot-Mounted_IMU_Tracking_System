@@ -78,6 +78,13 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=2.0, Ki=0.5, ge
                 eInt_y += e_y * dt
                 eInt_z += e_z * dt
 
+                # Clamp the accumulated error to a max of 2.0deg/s so that sudden weird
+                # movements wont blow the integrator
+                max_eInt_val = np.deg2rad(2.0) / Ki
+                eInt_x = max(-max_eInt_val, min(max_eInt_val, eInt_x))
+                eInt_y = max(-max_eInt_val, min(max_eInt_val, eInt_y))
+                eInt_z = max(-max_eInt_val, min(max_eInt_val, eInt_z))
+
             # Apply the real time Proportional nudge
             wx += (Kp * e_x)
             wy += (Kp * e_y)
