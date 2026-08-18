@@ -85,7 +85,7 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
     </td>
   </tr>
   <tr>
-    <td align="center"><em>Figure 5: I2C mean: 10488 µs, Wire1 I2C bus (f) = 100kHz</em></td>
+    <td align="center"><em>Figure 5: I2C mean: 10394 µs, Wire1 I2C bus (f) = 100kHz</em></td>
     <td align="center"><em>Figure 6: I2C mean: 3736 µs, Wire1 I2C bus (f) = 400kHz</em></td>
   </tr>
 </table>
