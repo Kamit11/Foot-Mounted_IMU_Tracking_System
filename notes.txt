@@ -200,3 +200,68 @@ Target: 19.985 m
 Error percentage: -2.592%
 Final Z (Vertical) Error: -0.429 m
 Mean Pre-ZUPT X-Velocity: -0.006 m/s
+
+
+
+-----------------------------------------------------
+
+Closed loops: 18m
+
+Walking COUNTER-CLOCKWISE:
+20-18-09: Reached the walls with my feet and body facing the 
+next wall I plan on walking towards.
+
+
+20-21-03: After reaching the point, stayed still for a couple of sec and then turned
+IN PLACE, then continued walking.
+
+20-23-47: Reached the walls, stayed in place for a couple of sec, 
+then started walking along the wall I was facing (face and feet are facing the WALL when stationary).
+
+20-42-32: Like 20-23-47
+
+20-44-45: Like 20-23-47 - 22 steps
+
+20-51-07: Like 20-23-47
+
+-
+
+The next logs are recorded walking CLOCKWISE (all like log 20-23-47) 18m:
+
+21-00-25: Reached the walls, stayed in place for a couple of sec, 
+then started walking along the wall I was facing (face and feet are facing the WALL when stationary).
+
+21-04-11: Like 21-00-25
+
+21-05-53: Like 21-00-25
+
+21-07-25: Like 21-00-25. 21 steps total - had a very big gate near the end, maybe a huge
+heel strike occures because of it.
+
+-
+
+21-15-02_long_closed_loop: long closed loop (only wood flooring), rotating COUNTER-CLOCKWISE
+length unknown
+
+-
+
+18m clockwise walk no stopping:
+
+21-18-50
+
+21-19-41: small step at the end
+
+21-20-55
+
+same, but counterclockwise:
+
+21-22-12
+
+21-26-21
+
+21-26-59
+
+-
+
+21-29-05: Lastly, a very long loop (length unknown)
+

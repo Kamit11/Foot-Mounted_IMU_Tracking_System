@@ -6,7 +6,7 @@ from datetime import datetime
 
 N = 999999
 
-prefix = "tilt_long_edge"
+prefix = "closed_loop"
 header = "t_us, seq, ax, ay, az, gx, gy, gz, valid, t_imu_us, t_serial_us, missed"
 port = 'COM3'
 

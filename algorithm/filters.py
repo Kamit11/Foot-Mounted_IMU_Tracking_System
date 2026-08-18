@@ -97,6 +97,8 @@ def mahony_filter(ax, ay, az, gx, gy, gz, dt_array, zvw_mask, Kp=2.0, Ki=0.5, ge
         # gyro integration
         qw, qx, qy, qz = q
 
+        # Calulate q_dot - this is how a we rotate a quaternion using
+        # a given angular velocity (omega)
         q_dot_w = 0.5 * (-qx*wx - qy*wy - qz*wz)
         q_dot_x = 0.5 * ( qw*wx + qy*wz - qz*wy)
         q_dot_y = 0.5 * ( qw*wy - qx*wz + qz*wx)
