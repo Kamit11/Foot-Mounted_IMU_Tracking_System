@@ -80,6 +80,7 @@ This revealed ~1,674 µs of fixed CPU overhead per read. A review of the library
 </em>
 </p>
 
+
 ## Performance Profiling & Optimization
 
 ### Hardware FPU Validation
@@ -101,10 +102,10 @@ transmission.
 <table>
   <tr>
     <td width="50%">
-      <img width="100%" alt="Serial output: 500 iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_disabled_benchmark_01-08-2026_21-40-16_dual_plot.png" />
+      <img width="100%" alt="Serial output: 500 iteration float workload with the FPU disabled, averaging 889 µs" src="https://github.com/user-attachments/assets/5a07bafe-b757-4db4-8c8e-c90c9573093b" />
     </td>
     <td width="50%">
-      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/Kamit11/foot-mounted-inertial-mapper/blob/master/data/FPU_Benchmark/fpu_enabled_benchmark_01-08-2026_21-45-09_dual_plot.png" />
+      <img width="100%" alt="Serial output: identical workload with hardware FPU enabled, averaging 101 µs" src="https://github.com/user-attachments/assets/5b871daf-a1e2-4c01-9bb2-32ab755d5e22" />
     </td>
   </tr>
   <tr>
