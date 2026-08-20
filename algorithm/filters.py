@@ -133,7 +133,6 @@ def quaternions_to_euler(quats):
     return np.rad2deg(roll), np.rad2deg(pitch), np.rad2deg(yaw)
 
 
-
 def rotate_vector_by_quaternion(v, q):
     # Extract vector components
     vx, vy, vz = v[:, 0], v[:, 1], v[:, 2]
@@ -150,3 +149,20 @@ def rotate_vector_by_quaternion(v, q):
     rz = vz + qw * tz + (qx * ty - qy * tx)
     
     return np.column_stack((rx, ry, rz))
+
+
+def apply_zaru_single_mean(gz, zaru_mask):
+    """
+    Collects all gated samples, takes one mean, and subtracts 
+    that single fixed value across the entire log.
+    """
+    gz_cleaned = np.zeros_like(gz)
+    fixed_bias_z = 0.0
+
+    if np.sum(zaru_mask) > 0:
+        fixed_bias_z = np.mean(gz[zaru_mask])
+    else:
+        fixed_bias_z = 0.0
+        
+    gz_cleaned = gz - fixed_bias_z
+    return gz_cleaned, fixed_bias_z
