@@ -9,7 +9,6 @@ header = "seq,work_time_us,mismatches"
 
 csv_filepath = al.collect_serial_data(header = header, file_prefix=prefix, num_samples=N)
 
-
 # Load the collected data and analyze it
 d = np.loadtxt(f"{csv_filepath}", delimiter=',', skiprows=1)
 seq, work, mismatches = d.T
