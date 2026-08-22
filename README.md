@@ -10,15 +10,17 @@ Foot-mounted inertial navigation for indoor mapping and dead reckoning using zer
 | **ZVW Detection Accuracy** | 100% (20/20 on tuning set, 10/10 on held-out validation). | 100% |
 | **Loop Timing** | 200 Hz scheduler maintained. Jitter tightly spiked at 5,000 µs. | 5,000 µs |
 | **Attitude Stability** | Settled noise σ < 0.01°, ~20 s initial convergence. Dynamic tilt-and-return recovery: < 0.5°. | < 1.0° |
+| **Closed-Loop Wall Accuracy** | 2.95% (short walls), 2.14% (long walls) across 11 loops of a tape-measured 2.4 × 6.6 m room. | qualitative |
+| **Loop Closure Gap** | 0.212 m after Manhattan snapping (1.18% of an 18 m perimeter), down from 0.699 m unsnapped. | qualitative |
 
 <p align="center">
-  <img src="data/orientation_mahony/initial_walk_test_10-08-2026_16-28-57_1_2D_Trajectory.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 1: Final 2D calculated trajectory plotting the full 20 m walk.</em>
+  <img src="data/ZARU_and_loop_closure/closed_loop_18-08-2026_20-23-47_1_CW_18m_Mapping.png" style="width: 65%; height: auto;" /><br>
+  <em>Figure 1: Final 2D calculated map to a 18m (2.4 x 6.6 m) rectangle.</em>
 </p>
 
 ---
 
-## Phase 2: Algorithm Pipeline & Sensor Fusion
+## Algorithm Pipeline & Sensor Fusion
 
 ### 1. Attitude Verification & ZVW-Gated Mahony
 To prevent the gyroscope from drifting during human gait, a Mahony filter is aggressively gated by the Zero Velocity Window (ZVW) mask. The accelerometer correction only applies when the foot is planted, allowing the filter to run open-loop on the gyro during the swing phase.
@@ -33,8 +35,8 @@ To prevent the gyroscope from drifting during human gait, a Mahony filter is agg
 </p>
 
 ### 2. Error Mechanism & Integration Pipeline
-The system relies on double integration of linear acceleration, with ZUPT resetting velocity to zero at every stance phase. The causal chain of integration error was successfully identified and quantified:
-* **The Mechanism:** Pre-ZUPT velocity predicts the final distance error with an incredibly strong correlation ($r = -0.997, n = 4$). 
+The system relies on double integration of linear acceleration, with ZUPT resetting velocity to zero at every stance phase. The causal chain of integration error was identified and quantified:
+* **The Mechanism:** Pre-ZUPT velocity predicts the final distance error with a strong correlation ($r = -0.997, n = 4$). 
 * **Physics Match:** The fitted slope of this error (-5.70 m per m/s) matches the analytical physical prediction ($\frac{1}{2}vTN$) to within 10%, confirming the causal chain from attitude tilt error $\rightarrow$ gravity leakage $\rightarrow$ integration drift.
 
 <p align="center">
@@ -66,9 +68,46 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
   <em>Figure 4: Kp/Ki tuning grid scores showing a broad plateau of stability, proving the selected values (2.0/0.5) generalize and are not overfitted to noise.</em>
 </p>
 
+
+### 4. Closed-Loop Validation & Manhattan Snapping
+
+**Objective:** Convert a drifting free-running trajectory into a metric floor plan, and quantify how much of the residual error is recoverable by geometric prior rather than by better estimation.
+
+**Method:** Step vectors are extracted at ZVW midpoints and filtered to strides above 0.2 m to reject micro-movements. Dominant building orientation is recovered by a stride-length-weighted circular mean of step headings taken modulo 90°, which yields a single grid offset per walk. Every step heading is then snapped to the nearest grid axis and the path is reconstructed from the snapped headings, preserving the original step magnitudes. No loop-closure constraint is applied: the closure gap is measured, not enforced.
+
+**Dataset:** 11 closed-loop walks of a tape-measured 2.4 × 6.6 m rectangle (18.0 m perimeter), split across both turn directions and with and without deliberate corner pauses.
+
+| Metric | Result |
+| :--- | ---: |
+| Mean perimeter | 18.034 m (+0.19% vs 18.0 m tape) |
+| Perimeter scatter | 0.199 m (1.11%) |
+| Closure gap, unsnapped | 0.699 m (3.88% of perimeter) |
+| Closure gap, snapped | 0.212 m (1.18% of perimeter) |
+| Best single closure | 0.013 m |
+
+**Per-wall accuracy (n = 22 walls per class):**
+
+| Wall class | Tape | Mean abs error | As % of wall | Mean signed error |
+| :--- | ---: | ---: | ---: | ---: |
+| Short (2.4 m) | 2.4 m | 0.071 m | 2.95% | −0.056 m |
+| Long (6.6 m) | 6.6 m | 0.141 m | 2.14% | +0.073 m |
+
+**Result:** Snapping reduces mean closure gap by 3.3× without imposing a closure constraint, so the improvement is evidence that the heading estimate was genuinely near-orthogonal rather than an artifact of forcing the path shut. Perimeter accuracy is unaffected by snapping because step magnitudes are preserved; the +0.19% figure is the raw ZUPT integration result.
+
+**The resolution limit:** Per-wall error is an absolute floor of roughly 0.1 m, not a percentage. Short walls appear worse only because the same physical error is divided by a smaller number. The mechanism is structural: a wall is measured as an integer number of stance-to-stance vectors, and the corner vertex lands on the nearest detected stance rather than on the true corner, so each wall carries a sub-stride placement error. The signed errors confirm a small real transfer, with short walls losing 0.056 m and long walls gaining 0.073 m, and the four per-wall errors summing to the +0.034 m perimeter error.
+
+Intersecting adjacent snapped wall lines by least squares would place true corner vertices and recover the systematic ~0.06 m component. This was deliberately not built: the recoverable systematic error is smaller than the 0.07 to 0.14 m irreducible random component, so the refinement would improve a metric already at ~3% while leaving the dominant term untouched. Documented as available and unbuilt, alongside the accelerometer calibration.
+
+**Open observation:** Closure gap and fitted grid offset both split cleanly by turn direction. Clockwise walks average a 0.334 m unsnapped gap and 0.85° grid offset; counter-clockwise walks average 1.137 m and 6.02°. Elapsed time was tested as a cause and ruled out: the longest clockwise walk (56.0 s) closed eight times tighter than a shorter counter-clockwise walk (46.8 s), and the asymmetry persists at matched 22.9 s durations. The cause is not established and n = 5 for the counter-clockwise group, so no mechanism is claimed here.
+
+<p align="center">
+  <img src="data/ZARU_and_loop_closure/closed_loop_18-08-2026_21-15-02_long_loop_CCW_Mapping.png" style="width: 65%; height: auto;" /><br>
+  <em>Figure 5: Unmeasured long loop walk.</em>
+</p>
+
 ---
 
-## Phase 1: Hardware Engineering Log & Characterization
+## Hardware Engineering Log & Characterization
 
 ### 1. I2C Read Path & Scheduler Optimization
 **Measurement:** Initial loop timings using the stock wrapper library yielded an I2C read cost of 10,488 µs, consistently missing the 5,000 µs (200 Hz) deadline budget.
@@ -91,7 +130,7 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 </table>
 
 **Decision:** Bypassed the library wrapper for raw register-level access via a contiguous 12-byte burst read at 400 kHz.
-**Result:** Read time dropped to 477 µs (a 22× speedup). The 200 Hz scheduler was successfully maintained, with jitter strictly bounded: dt mean 5000 µs, min 4972, max 5029, and 0 missed deadlines over 60,000 samples (5 minutes).
+**Result:** Read time dropped to 477 µs (a 22× speedup). The 200 Hz scheduler was maintained, with jitter strictly bounded: dt mean 5000 µs, min 4972, max 5029, and 0 missed deadlines over 60,000 samples (5 minutes).
 
 <p align="center">
   <img src="data/IMU_Reading_Times/IMU_reading_times_I2C_Optimized_Burst_07-08-2026_18-53-38_jitter.png" style="width: 65%; height: auto;" /><br>
@@ -122,11 +161,9 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 ---
 
 ## Limitations & Future Work
-- **Vertical position not corrected:** Z closure error is 0.43–0.59 m over 20 m on a level floor. Excluded by design — barometer indoor accuracy is worse than the objects being measured.
-- **No heading correction yet:** ZARU, loop closure, and Manhattan snapping are not implemented. Maps are body-relative with arbitrary north.
-- **Pipeline runs offline in Python:** Firmware currently logs data only; no on-board estimation or BLE transmission is active.
-- **Accelerometer calibration measured but unapplied:** (Bias 1.22%, scale 0.92% on the Z-axis).
-
+- **Heading is body-relative:** Manhattan snapping recovers building orientation and is validated above, but ZARU and loop-closure distribution are not implemented. Maps have no absolute north.
+- **Corner vertices land on stances, not true corners:** ~0.1 m per-wall placement floor. A least-squares wall-line intersection would recover the systematic ~0.06 m component; not built, see §4.
+- **Direction-dependent closure asymmetry unexplained:** see §4.
 ---
 
 ## Appendix: Architecture & Preemption Safety
@@ -139,7 +176,7 @@ The mapper's Mahony filter runs at a fixed 200 Hz, granting a hard 5,000 µs bud
 | Soft float (emulated)        |  ~889 µs  |               18.0 % |
 | Hard float (Cortex M4F FPU)  |  ~101 µs  |                2.0 % |
 
-While soft-float would have sufficed at 18% of the budget, activating the FPU yielded an 8.8× speedup. This physical measurement successfully turned a guess into a defensible architectural decision, reclaiming 16% of the loop budget.
+While soft-float would have sufficed at 18% of the budget, activating the FPU yielded an 8.8× speedup. This physical measurement turned a guess into a defensible architectural decision, reclaiming 16% of the loop budget.
 
 ### Thread Preemption Safety
 The Nano 33 BLE runs Mbed OS beneath the sketch. Across 120,000 iterations, processing time showed ~50 µs of preemption-induced variance. Bit-for-bit comparison of the resulting floats yielded 0 mismatches, confirming the scheduler correctly preserves FPU register context during thread preemption.
