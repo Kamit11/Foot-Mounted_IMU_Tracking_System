@@ -10,7 +10,7 @@ Foot-mounted inertial navigation for indoor mapping and dead reckoning using zer
 | **ZVW Detection Accuracy** | 100% (20/20 on tuning set, 10/10 on held-out validation). | 100% |
 | **Loop Timing** | 200 Hz scheduler maintained. Jitter tightly spiked at 5,000 µs. | 5,000 µs |
 | **Attitude Stability** | Settled noise σ < 0.01°, ~20 s initial convergence. Dynamic tilt-and-return recovery: < 0.5°. | < 1.0° |
-| **Closed-Loop Wall Accuracy** | 2.95% (short walls), 2.14% (long walls) across 11 loops of a tape-measured 2.4 × 6.6 m room. | qualitative |
+| **Closed-Loop Wall Accuracy** | 2.95% (short walls), 2.14% (long walls) across 14 loops of a tape-measured 2.4 × 6.6 m room. | qualitative |
 | **Loop Closure Gap** | 0.212 m after Manhattan snapping (1.18% of an 18 m perimeter), down from 0.699 m unsnapped. | qualitative |
 
 <p align="center">
@@ -96,13 +96,15 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 
 **The resolution limit:** Per-wall error is an absolute floor of roughly 0.1 m, not a percentage. Short walls appear worse only because the same physical error is divided by a smaller number. The mechanism is structural: a wall is measured as an integer number of stance-to-stance vectors, and the corner vertex lands on the nearest detected stance rather than on the true corner, so each wall carries a sub-stride placement error. The signed errors confirm a small real transfer, with short walls losing 0.056 m and long walls gaining 0.073 m, and the four per-wall errors summing to the +0.034 m perimeter error.
 
+**The ZARU Negative Result:** A Zero Angular Rate Update (ZARU) algorithm was fully implemented to combat the empirical session-to-session gyro bias drift. However, controlled closed-loop experiments revealed that applying ZARU degraded closure accuracy (e.g., gap worsened from 1.62 m to 3.03 m on a 3-minute walk). The data proved that the Mahony filter's integral term ($K_i$), when aggressively gated by the ZVW, already fully absorbs the Z-axis bias during stance phases. ZARU was therefore proven redundant for stance-rich walks and deliberately excluded from the final estimation pipeline to prevent double-correction.
+
 Intersecting adjacent snapped wall lines by least squares would place true corner vertices and recover the systematic ~0.06 m component. This was deliberately not built: the recoverable systematic error is smaller than the 0.07 to 0.14 m irreducible random component, so the refinement would improve a metric already at ~3% while leaving the dominant term untouched. Documented as available and unbuilt, alongside the accelerometer calibration.
 
-**Open observation:** Closure gap and fitted grid offset both split cleanly by turn direction. Clockwise walks average a 0.334 m unsnapped gap and 0.85° grid offset; counter-clockwise walks average 1.137 m and 6.02°. Elapsed time was tested as a cause and ruled out: the longest clockwise walk (56.0 s) closed eight times tighter than a shorter counter-clockwise walk (46.8 s), and the asymmetry persists at matched 22.9 s durations. The cause is not established and n = 5 for the counter-clockwise group, so no mechanism is claimed here.
+**Open observation:** Closure gap splits cleanly by turn direction. Clockwise walks average a 0.334 m unsnapped gap; counter-clockwise walks average 1.137 m. Elapsed time was tested as a cause and ruled out: the longest clockwise walk (56.0 s) closed 7.8× tighter than a shorter counter-clockwise walk (46.8 s), and the asymmetry persists at matched 22.9 s durations. The cause is not established and n = 5 for the counter-clockwise group, so no mechanism is claimed here.
 
 <p align="center">
   <img src="data/ZARU_and_loop_closure/closed_loop_18-08-2026_21-15-02_long_loop_CCW_Mapping.png" style="width: 65%; height: auto;" /><br>
-  <em>Figure 5: Unmeasured long loop walk.</em>
+  <em>Figure 8: Unmeasured long loop walk.</em>
 </p>
 
 ---
@@ -148,7 +150,7 @@ Intersecting adjacent snapped wall lines by least squares would place true corne
 **Measurement:** Validation of sensor configurations against physical human gait metrics.
 * **Range Justification:** Peak dynamic walking magnitude reached 11.4 g (heel strike), empirically justifying the ±16 g accelerometer range. Peak gyro swing reached 1,360 dps (68% of the gyro's full scale), validating the ±2000 dps range requirement.
 * **Axis Frame Establishment:** A physical rotation consistency test proved that the stock library's axis remap was improper (det = -1, gravity landed on -Y). The remap was discarded in favor of the hardware native frame.
-* **The Empirical Case for ZARU:** Gyro bias was observed moving by 0.19 °/s between testing sessions. This session-to-session instability forms the empirical, quantitative justification for requiring a Zero Angular Rate Update (ZARU) algorithm for heading corrections.
+* **The Empirical Case for ZARU:** Gyro bias was observed moving by 0.19 °/s between testing sessions. This session-to-session instability forms the empirical, quantitative justification for investigating a Zero Angular Rate Update (ZARU) algorithm for heading corrections.
 
 ### 4. Zero Velocity Window (ZVW) Detection
 **Objective:** Identify the exact moments the foot is perfectly still to allow for velocity resets (ZUPT).
@@ -161,7 +163,7 @@ Intersecting adjacent snapped wall lines by least squares would place true corne
 ---
 
 ## Limitations & Future Work
-- **Heading is body-relative:** Manhattan snapping recovers building orientation and is validated above, but ZARU and loop-closure distribution are not implemented. Maps have no absolute north.
+- **Heading is body-relative:** Manhattan snapping recovers building orientation and is validated above, but loop-closure distribution is not applied to measurement outputs to avoid corrupting raw trajectory data. Maps have no absolute north.
 - **Corner vertices land on stances, not true corners:** ~0.1 m per-wall placement floor. A least-squares wall-line intersection would recover the systematic ~0.06 m component; not built, see §4.
 - **Direction-dependent closure asymmetry unexplained:** see §4.
 ---
