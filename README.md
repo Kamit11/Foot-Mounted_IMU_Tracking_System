@@ -75,7 +75,7 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 
 **Method:** Step vectors are extracted at ZVW midpoints and filtered to strides above 0.2 m to reject micro-movements. Dominant building orientation is recovered by a stride-length-weighted circular mean of step headings taken modulo 90°, which yields a single grid offset per walk. Every step heading is then snapped to the nearest grid axis and the path is reconstructed from the snapped headings, preserving the original step magnitudes. No loop-closure constraint is applied: the closure gap is measured, not enforced.
 
-**Dataset:** 11 closed-loop walks of a tape-measured 2.4 × 6.6 m rectangle (18.0 m perimeter), split across both turn directions and with and without deliberate corner pauses.
+**Dataset:** 14 closed-loop walks of a tape-measured 2.4 × 6.6 m rectangle (18.0 m perimeter), split across both turn directions and with and without deliberate corner pauses.
 
 | Metric | Result |
 | :--- | ---: |
@@ -85,7 +85,7 @@ Initial testing ($K_p=1.0, K_i=0.0$) yielded a 4.16% run-to-run standard deviati
 | Closure gap, snapped | 0.212 m (1.18% of perimeter) |
 | Best single closure | 0.013 m |
 
-**Per-wall accuracy (n = 22 walls per class):**
+**Per-wall accuracy (n = 28 walls per class):**
 
 | Wall class | Tape | Mean abs error | As % of wall | Mean signed error |
 | :--- | ---: | ---: | ---: | ---: |
