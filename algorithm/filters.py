@@ -133,7 +133,7 @@ def quaternions_to_euler(quats):
     return np.rad2deg(roll), np.rad2deg(pitch), np.rad2deg(yaw)
 
 
-def rotate_vector_by_quaternion(v, q):
+def rotate_vector_by_quaternion(v: np.ndarray, q):
     # Extract vector components
     vx, vy, vz = v[:, 0], v[:, 1], v[:, 2]
     # Extract quaternion components
