@@ -160,6 +160,28 @@ Intersecting adjacent snapped wall lines by least squares would place true corne
 * **Accuracy:** Empirically validated on held-out data with a 100% detection rate (20/20 on the tuning set alongside 10/10 on the held-out validation walk).
 * **Boundary Precision:** Algorithm entry boundaries agreed with manual ground truth to a mean offset of +1.4 samples (ranging -3 to +7). Exit boundaries were systematically late by 8–12 samples across every window due to the trailing 15-sample variance threshold holding the gate open.
 
+### 5. Magnetometer Characterization
+**Objective:** Empirically quantify local magnetic field distortions within an indoor environment to determine the viability of magnetometer-based yaw correction.
+
+**Method:** Map the raw magnetic field magnitude and the perceived global magnetic north across a closed-loop walking trajectory. The perceived north was calculated by rotating the raw magnetometer vectors into the world frame using the Mahony filter's local quaternion estimate at each sample, isolating the environmental field direction.
+
+**Conclusion:** The local magnetic field exhibits severe spatial distortion, rendering the magnetometer unusable for heading estimation in this environment. Perceived magnetic north diverges across the full 360° spectrum along the trajectory. Because this angular wander correlates heavily with global spatial position rather than local sensor orientation (e.g., along a straight wall, foot orientation remained within a ~26° variance while perceived north swung by 202°), the interference is dominated by world-fixed structural elements (e.g., floor rebar, steel beams). This spatial variance cannot be corrected via standard sensor-frame calibration, necessitating the deactivation of magnetometer updates for indoor tracking.
+
+<table>
+  <tr>
+    <td width="50%">
+      <img width="100%" alt="Magnetometer Magnitude across a 2.4x6.6 m loop" src="data/magnetometer_readings/mag_walk_indoors_23-08-2026_20-02-47_Magnetometer_color_map.png" />
+    </td>
+    <td width="50%">
+      <img width="100%" alt="Magnetometer wander readings across a 2.4x6.6 m loop" src="data/magnetometer_readings/mag_walk_indoors_23-08-2026_20-02-47_Magnetometer_North_Color_Map.png" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><em>Figure 9: Magnetometer Magnitude across a 2.4x6.6 m loop</em></td>
+    <td align="center"><em>Figure 10: Magnetometer wander readings across a 2.4x6.6 m loop</em></td>
+  </tr>
+</table>
+
 ---
 
 ## Limitations & Future Work
