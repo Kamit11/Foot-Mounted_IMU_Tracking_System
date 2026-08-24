@@ -7,7 +7,7 @@ from datetime import datetime
 N = 999999
 
 prefix = "mag_walk_indoors"
-header = "t_us, seq, ax, ay, az, gx, gy, gz, mx, my, mz, valid_mag_reading, valid, t_imu_us, t_serial_us, last_t_mag, missed"
+header = "t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed"
 port = 'COM3'
 
 

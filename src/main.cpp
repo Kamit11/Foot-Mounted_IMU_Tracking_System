@@ -62,31 +62,19 @@ void loop() {
   Vector3 accData = _IMUData.acc;
   Vector3 gyroData = _IMUData.gyro;
 
-  // Read the magnetometer
-  uint32_t t2 = micros();
-  static float mx, my, mz;
-  int valid_mag_reading = 0;
-  if (IMU.magneticFieldAvailable()){
-    IMU.readMagneticField(mx, my, mz);
-    valid_mag_reading = 1;
-  }
-  uint32_t current_t_mag = micros() - t2;
-
   // Store the previous times:
   static uint32_t last_t_imu = 0;
   static uint32_t last_t_serial = 0;
-  static uint32_t last_t_mag = 0;
 
   // ----Serial write----
   uint32_t t1 = micros();
-  char buf[256];
+  char buf[128];
 
-  int len = snprintf(buf, sizeof(buf), "%lu,%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%lu,%lu,%lu,%lu\n",
+  int len = snprintf(buf, sizeof(buf), "%lu,%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%lu,%lu,%lu\n",
       now, seq, 
       accData.x, accData.y, accData.z, 
       gyroData.x, gyroData.y, gyroData.z,
-      mx, my, mz, valid_mag_reading,
-      _IMUData.valid, last_t_imu, last_t_serial, last_t_mag, missed);
+      _IMUData.valid, last_t_imu, last_t_serial, missed);
   
   seq++;
 
@@ -97,5 +85,4 @@ void loop() {
   // Save current timings for the next loop
   last_t_imu = current_t_imu;
   last_t_serial = current_t_serial;
-  last_t_mag = current_t_mag;
 }
