@@ -58,6 +58,7 @@ class KinematicsState:
 
     stance_onset_pos: np.ndarray = field(default_factory=lambda: np.zeros(3, dtype=np.float32))
 
+
 @dataclass
 class SystemState:
     """
@@ -223,7 +224,6 @@ def update_kinematics(state: KinematicsState, q: np.ndarray, ax: float, ay: floa
     """
     Rotates acceleration, removes gravity, and integrates to velocity and position.
     """
-
     # take a snapshot
     if dwell_counter == 1:
         state.stance_onset_pos = np.copy(state.position)
