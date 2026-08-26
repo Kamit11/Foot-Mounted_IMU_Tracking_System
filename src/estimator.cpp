@@ -34,7 +34,7 @@ bool update_zvw(ZVWState& state, float ax, float ay, float az, float gx, float g
         var_cond = (acc_var <= VAR_LIMIT);
     }
 
-    bool acc_cond = fabsf(acc_mag - 1.0) <= ACC_DEVIATION;
+    bool acc_cond = fabsf(acc_mag - 1.0f) <= ACC_DEVIATION;
     bool gyro_cond = gyro_mag <= GYRO_LIMIT;
 
     state.instant_quiet = acc_cond && gyro_cond && var_cond;
@@ -47,7 +47,7 @@ bool update_zvw(ZVWState& state, float ax, float ay, float az, float gx, float g
 }
 
 
-void update_mahony(FilterState& state, float ax, float ay, float az, float gx, float gy, float gz, float dt, bool instant_quiet, float Kp = 2.0f, float Ki = 0.5f){
+void update_mahony(FilterState& state, float ax, float ay, float az, float gx, float gy, float gz, float dt, bool instant_quiet, float Kp, float Ki){
     if (state.is_initialized == false){
         state.init_sample_count++;
         state.init_acc_accum[0] += ax;
