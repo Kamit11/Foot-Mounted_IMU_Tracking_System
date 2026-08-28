@@ -39,8 +39,11 @@ bool update_zvw(ZVWState& state, float ax, float ay, float az, float gx, float g
 
     state.instant_quiet = acc_cond && gyro_cond && var_cond;
 
-    if (state.instant_quiet) state.dwell_counter++;
-    else state.dwell_counter = 0;
+    if (state.instant_quiet) {
+        if (state.dwell_counter < 255) state.dwell_counter++;
+    } else {
+        state.dwell_counter = 0;
+    }
 
     state.is_zvw = state.dwell_counter >= DWELL;
     return state.is_zvw;

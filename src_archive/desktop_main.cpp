@@ -48,7 +48,7 @@ void loop() {
 
   static uint32_t missed = 0;
   // This means that the current time has reached or passed the next scheduled tick time
-  // Use a while loop to count all dropped deadlines
+  // Use a while loop to count all dropped deadlinesasdasdas
   while (int32_t(now - nextTick) >= 0) {
     nextTick += target_delta_t; 
     missed++;
@@ -75,7 +75,7 @@ void loop() {
       accData.x, accData.y, accData.z, 
       gyroData.x, gyroData.y, gyroData.z,
       _IMUData.valid, last_t_imu, last_t_serial, missed);
-  
+
   seq++;
 
   Serial.write(buf, len);
