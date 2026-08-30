@@ -6,7 +6,7 @@ from datetime import datetime
 
 N = 999999
 
-prefix = "mag_walk_indoors"
+prefix = "18m_walk_indoors_with_BLE_wired"
 header = "t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed"
 port = 'COM3'
 
