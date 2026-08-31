@@ -1,15 +1,34 @@
 import serial
 import time
 import os
+import keyboard
 from datetime import datetime
 
 
 N = 999999
 
-prefix = "18m_walk_indoors_with_BLE_wired"
-header = "t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed"
+prefix = "polygons_test_wired"
+header = "t_us,seq,ax,ay,az,gx,gy,gz,valid,t_imu_us,t_serial_us,missed,polygon_association"
 port = 'COM3'
 
+polygon_id_counter = 0
+current_polygon_id = -1
+is_capturing_polygon = False
+
+def polygon_control_inc(_):
+    global is_capturing_polygon, polygon_id_counter, current_polygon_id
+    
+    is_capturing_polygon = not is_capturing_polygon
+    
+    if is_capturing_polygon:
+        # Starting a new capture: increment the counter and set it as the active ID
+        polygon_id_counter += 1
+        current_polygon_id = polygon_id_counter
+        print("Polygon Opened")
+    else:
+        # Stopped capturing: reset the active ID to -1
+        current_polygon_id = -1
+        print("Polygon Closed")
 
 
 def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benchmark", save_to_temp_dir=True):
@@ -19,6 +38,8 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
     """
     timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     filename = f"{file_prefix}_{timestamp}.csv"
+    keyboard.on_press_key('space', polygon_control_inc)
+
 
     if not header.endswith('\n'):
             header += '\n'
@@ -32,7 +53,7 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
     print(f"Listening on {port} for {num_samples} samples, saving to {filepath}...")
     
     with serial.Serial(port, 115200, timeout=2) as s, open(filepath, "w", encoding='utf-8') as f:
-        time.sleep(2)                # Allow Arduino to reset
+        time.sleep(2)                                                                                                                        # Allow Arduino to reset
         s.reset_input_buffer()
 
         # Send a single byte to break the Arduino out of its while loop
@@ -49,14 +70,21 @@ def collect_serial_data(header, port='COM5', num_samples=2000, file_prefix="benc
         rows_collected = 0
         while rows_collected < num_samples:
             line = s.readline().decode(errors='ignore').strip()
-
             # Only write lines that contain data (skip empty lines and the Arduino's header)
             if line and not line.startswith('seq'):
+                line.rstrip('\n')
+                
+                line += f",{current_polygon_id}"
+
                 f.write(line + "\n")
                 rows_collected += 1
 
                 if rows_collected % 100 == 0:
                     print(f"Saved {rows_collected}/{num_samples} samples.")
+                    f.flush()  # Force save to disk every 100 rows
+                    os.fsync(f.fileno()) # Ensure the OS writes it immediately
+
+    keyboard.unhook_all()
 
     print("Data collection complete. Serial port closed.")
     print("Saved to:", filepath)

@@ -11,7 +11,6 @@ void setup() {
   Serial.begin(115200);
   while (!Serial); // Wait for Serial to be ready
 
-  // --- WAIT FOR PYTHON SCRIPT ---
   // Block execution until at least one byte is received over Serial
   while (Serial.available() == 0) {
     // Wait infinitely for the start signal
