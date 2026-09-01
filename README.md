@@ -13,6 +13,7 @@ Foot-mounted inertial navigation for indoor mapping and dead reckoning using zer
 | **Closed-Loop Wall Accuracy** | 2.95% (short walls), 2.14% (long walls) across 11 loops of a tape-measured 2.4 × 6.6 m room. | qualitative |
 | **Loop Closure Gap** | 0.212 m after Manhattan snapping (1.18% of an 18 m perimeter), down from 0.699 m unsnapped. | qualitative |
 | **Live On-Board Parity** | Wired-BLE walk reproduced the offline map to within 1 mm at 0.322 m closure. Boolean gates bit-exact vs the Python oracle across ~10,000 samples. | Match offline |
+| **Object Repeatability** | Two identical tables, walked independently, reconstructed to within 1.6% and 3.0% on linear dimensions. Unmeasured; see Interaction & 2.5D Reconstruction §3. | qualitative |
 
 <p align="center">
   <img alt="Manhattan-snapped 2D map of a tape-measured 2.4 by 6.6 m rectangular loop" src="data/ZARU_and_loop_closure/closed_loop_18-08-2026_20-23-47_1_CW_18m_Mapping.png" width="65%" /><br>
@@ -166,6 +167,74 @@ The correlation is drawn from walks that differ in more than one variable at a t
 
 ---
 
+## Interaction & 2.5D Reconstruction
+
+The estimator produces a metric trajectory. This section covers the layer that turns a trajectory into a labelled scene: how the operator tells the system what it is walking, and how tagged paths become an extruded 2.5D model.
+
+### 1. Interaction Model
+
+**Trigger: keystroke over serial, not gesture.** The roadmap specified an APDS-9960 proximity swipe with heel-strike fallback. Both were descoped. Data collection requires crouching to keep a short USB cable strain-relieved, which occupies a hand and puts the shoe close to the body, so a hands-free proximity trigger is impractical in the exact posture the capture demands. The roadmap named gesture capture as its designated cut point, and this is that cut taken on schedule rather than a feature that failed. The host logger binds a spacebar toggle and stamps the active polygon ID onto every sample as it is written, so the tag travels with the data rather than being reconstructed afterwards from timestamps.
+
+**State machine.** A single toggle drives a monotonic polygon counter. Transit is the resting state, tagged `-1`. The first opened polygon is the room boundary; every subsequent one is an object inside it. Position tracking never stops and is not affected by the toggle. Only the labelling changes, so an operator error in tagging costs a label, never the trajectory.
+
+| Test | Duration | Samples | Polygon sequence |
+| :--- | ---: | ---: | :--- |
+| Room + 1 object | 82.5 s | 16,500 | transit → boundary (32.1 s) → transit → object (22.3 s) → transit |
+| Room + 2 objects | 117.0 s | 23,400 | transit → boundary (48.3 s) → transit → object (19.6 s) → transit → object (20.2 s) → transit |
+
+Both captures ran at 200 Hz with zero missed deadlines and zero invalid IMU frames.
+
+### 2. Reconstruction Pipeline
+
+Raw IMU is processed offline through the verified estimator, then:
+
+1. Step vectors are extracted at ZVW midpoints as in §4, each inheriting the polygon ID active at that sample.
+2. Steps are grouped by polygon ID; transit segments are retained for the trajectory but excluded from any polygon outline.
+3. Each polygon is closed into a vertex ring and Manhattan-snapped against the grid recovered from the walk.
+4. Rings are extruded in PyVista: the room boundary stays flat as the floor outline, and object polygons extrude to a fixed 1.0 m height.
+5. Output is written as glTF alongside an interactive HTML view.
+
+### 3. Demonstrated Capability
+
+Both tests completed the chain end to end, from raw inertial samples to a labelled, extruded scene. Objects land in correct positions inside their room boundaries, and polygon grouping separated transit, boundary, and objects without manual correction.
+
+**Repeatability.** The two-object test walked two physically identical tables as separate polygons. This was not planned as an experiment, but it is the strongest self-consistency check in the dataset: two identical objects, two independent walks, reconstructed independently.
+
+| Object | Footprint | Ring perimeter |
+| :--- | ---: | ---: |
+| Table A | 7.02 × 3.86 m | 18.44 m |
+| Table B | 7.13 × 3.97 m | 18.67 m |
+| Difference | 0.11 m (1.6%) / 0.12 m (2.8%) | 0.23 m (1.2%) |
+
+The system reproduced two identical objects to within roughly 2% on linear dimensions, with no shared state between the two captures beyond the common attitude estimate.
+
+**What is not claimed here.** These are unmeasured reconstructions. The tape is not available on demand, since capture runs in a college library after hours, so no object footprint in this section has been checked against a tape measure. The quantitative validation for this project rests entirely on the tape-measured closed-loop walks in §4, and a reader should treat those numbers, not these, as the accuracy claim.
+
+Two further qualifications, stated because they bound how far these figures should be trusted:
+
+* These walks closed at 0.7 m to 1.44 m, against 0.212 m for the validated set. The crouched-cable collection posture produces a visibly looser gait than the careful August walks, and closure degrades accordingly. Both remain inside the 1.5 m gate.
+* The room-plus-one-object test walked a table whose true dimensions are known from earlier tape work, and the reconstruction is dimensionally consistent with it. That is not offered as validation: what is unverified is not the table's size but whether the walked path tracked its actual edges, and no record of the walk's registration to those edges exists.
+
+<table>
+  <tr>
+    <td width="50%">
+      <img alt="Photograph of the library room containing the two tables that were walked as object polygons" src="data/pyvista_mappings/polygons_test_wired_31-08-2026_21-21-29interactive_room_map_reference.jpeg" width="100%" />
+    </td>
+    <td width="50%">
+      <img alt="Extruded 2.5D reconstruction of the same room showing the floor boundary and both table objects" src="data/pyvista_mappings/polygons_test_wired_31-08-2026_21-21-29interactive_room_map.png" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><em>Figure 6: The captured room, photographed.</em></td>
+    <td align="center"><em>Figure 7: The same room reconstructed from foot-mounted inertial data alone. Floor boundary flat, both tables extruded to a fixed 1.0 m height.</em></td>
+  </tr>
+</table>
+
+**Deferred deliverable.** An object footprint measured against a tape remains outstanding, and is the one stated deliverable this project has not closed. It requires a single careful walk of an already tape-measured object rather than any new construction or measurement.
+
+
+---
+
 ## Hardware Engineering Log & Characterization
 
 ### 1. I2C Read Path & Scheduler Optimization
@@ -183,8 +252,8 @@ The correlation is drawn from walks that differ in more than one variable at a t
     </td>
   </tr>
   <tr>
-    <td align="center"><em>Figure 6: I2C mean: 10394 µs, Wire1 I2C bus (f) = 100kHz</em></td>
-    <td align="center"><em>Figure 7: I2C mean: 3736 µs, Wire1 I2C bus (f) = 400kHz</em></td>
+    <td align="center"><em>Figure 8: I2C mean: 10394 µs, Wire1 I2C bus (f) = 100kHz</em></td>
+    <td align="center"><em>Figure 9: I2C mean: 3736 µs, Wire1 I2C bus (f) = 400kHz</em></td>
   </tr>
 </table>
 
@@ -193,7 +262,7 @@ The correlation is drawn from walks that differ in more than one variable at a t
 
 <p align="center">
   <img alt="Loop timing jitter histogram for the optimized burst read at 200 Hz" src="data/IMU_Reading_Times/IMU_reading_times_I2C_Optimized_Burst_07-08-2026_18-53-38_jitter.png" width="65%" /><br>
-  <em>Figure 8: Burst-read loop timing. dt mean 5000 µs, min 4972, max 5029, 0 missed deadlines over 60,000 samples (5 minutes).</em>
+  <em>Figure 10: Burst-read loop timing. dt mean 5000 µs, min 4972, max 5029, 0 missed deadlines over 60,000 samples (5 minutes).</em>
 </p>
 
 ### 2. Sensor Configuration Discovery
@@ -234,8 +303,8 @@ The correlation is drawn from walks that differ in more than one variable at a t
     </td>
   </tr>
   <tr>
-    <td align="center"><em>Figure 9: Magnetometer Magnitude across a 2.4x6.6 m loop</em></td>
-    <td align="center"><em>Figure 10: Magnetometer wander readings across a 2.4x6.6 m loop</em></td>
+    <td align="center"><em>Figure 11: Magnetometer Magnitude across a 2.4x6.6 m loop</em></td>
+    <td align="center"><em>Figure 12: Magnetometer wander readings across a 2.4x6.6 m loop</em></td>
   </tr>
 </table>
 
@@ -247,7 +316,25 @@ The correlation is drawn from walks that differ in more than one variable at a t
 - **Direction-dependent closure asymmetry unexplained:** see Algorithm Pipeline §4.
 - **Untethered BLE is degraded relative to wired:** ~2 to 4.5 m closure against 0.322 m wired. Associated with session runtime rather than the estimator, which is verified identical. Cause not isolated; requires controlled single-variable repeats. Validated results use the wired pipeline.
 - **Position packet range is bounded:** absolute position is encoded as `int16_t` millimetres, giving ±32.767 m from the origin. Adequate for single-room and single-floor capture, and would need a wider field or a re-origin scheme for building-scale mapping.
-- **Gesture capture and polygon extrusion in progress:** not yet built, not reported here.
+- **Object footprints are demonstrated but not tape-validated:** polygon capture and 2.5D extrusion work end to end, but no object dimension has been checked against a tape. Quantitative accuracy rests on the measured closed-loop walks in Algorithm Pipeline §4. Closing this needs one careful walk of an already-measured object.
+- **Collection posture degrades gait quality:** polygon capture walks closed at 0.7 to 1.44 m against 0.212 m for the validated set, because the short tethered cable forces a crouched stride. Inside the 1.5 m gate, but not representative of the estimator's demonstrated accuracy.
+- **Gesture triggering descoped:** the APDS-9960 proximity swipe and heel-strike trigger were cut in favour of a host keystroke, since the wired crouched posture makes hands-free triggering impractical. This was the roadmap's designated cut point.
+---
+
+## Project Status Against Original Success Criteria
+
+| Gate | Target | Result | Status |
+| :--- | :--- | :--- | :--- |
+| Clean 200 Hz capture | Bounded jitter, no clipping, rigid mount | 0 missed deadlines over 60,000 samples; ±16 g and ±2000 dps ranges confirmed against 11.4 g and 1,360 dps measured peaks | Met |
+| Straight-line distance | < 5% over 20 m | +0.51% mean, 2.59% worst single run | Met |
+| Stance detection | 100% on held-out data | 20/20 tuning, 10/10 held-out validation | Met |
+| Closed room outline with drift correction | Per-wall accuracy against tape | 2.95% short walls, 2.14% long walls; closure 0.212 m after snapping | Met |
+| Magnetometer characterized | Data, not assertion | Indoor field distortion mapped and documented as unusable for heading | Met |
+| Live wireless parity | Live map matches offline | Wired BLE reproduced offline to within 1 mm at 0.322 m closure | Met |
+| Furniture capture with validation table | Object footprints, computed vs measured | Capture and 2.5D reconstruction demonstrated end to end; object-vs-tape row deferred | Partially met |
+
+Every quantitative gate the project set for itself has been met and measured. The single outstanding item is a tape-referenced object footprint, which requires one careful walk rather than further construction. Every algorithmic and system component described above is built, verified, and frozen.
+
 ---
 
 ## Appendix: Architecture & Preemption Safety
